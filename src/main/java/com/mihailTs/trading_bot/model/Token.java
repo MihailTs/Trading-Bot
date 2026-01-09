@@ -1,16 +1,19 @@
 package com.mihailTs.trading_bot.model;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class Token {
     private UUID id;
     private String name;
     private String ticker;
+    public LocalDateTime createdAt;
 
-    public Token(UUID id, String name, String ticker) {
+    public Token(UUID id, String name, String ticker, LocalDateTime createdAt) {
         setId(id);
         setName(name);
         setTicker(ticker);
+        setCreatedAt(createdAt);
     }
 
     public UUID getId() {
@@ -23,6 +26,14 @@ public class Token {
 
     public String getTicker() {
         return ticker;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
     public void setId(UUID id) {

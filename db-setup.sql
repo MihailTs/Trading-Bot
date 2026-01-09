@@ -55,3 +55,5 @@ CREATE TABLE "live-asset" (
     "updated_at" timestamp,
     FOREIGN KEY ("token_id") REFERENCES "token" ("id")
 );
+
+ALTER TABLE "token" ADD COLUMN "created_at" timestamp;
