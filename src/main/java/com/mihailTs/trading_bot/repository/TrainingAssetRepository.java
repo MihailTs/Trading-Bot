@@ -97,7 +97,9 @@ public class TrainingAssetRepository {
 
             int rowsUpdated = stmt.executeUpdate();
             if (rowsUpdated == 0) {
-                throw new ElementNotFoundException(String.format("No asset with token_id %s was found to update.", tokenId));
+                throw new ElementNotFoundException(
+                        String.format("No asset with token_id %s was found to update.", tokenId)
+                );
             }
         } catch (SQLException | ElementNotFoundException e) {
             e.printStackTrace();
@@ -113,7 +115,9 @@ public class TrainingAssetRepository {
 
             rowsDeleted = stmt.executeUpdate();
             if (rowsDeleted == 0) {
-                throw new ElementNotFoundException(String.format("No token with id %s was found to delete.", tokenId));
+                throw new ElementNotFoundException(
+                        String.format("No token with id %s was found to delete.", tokenId)
+                );
             }
         } catch (SQLException | ElementNotFoundException e) {
             e.printStackTrace();

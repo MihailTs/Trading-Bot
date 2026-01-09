@@ -5,14 +5,14 @@ import java.util.UUID;
 
 public abstract class Transaction {
     private UUID id;
-    private UUID tokenId;
     private UUID priceId;
     private String type;
     private LocalDateTime createdAt;
+    private double quantity;
 
-    public Transaction(UUID id, UUID tokenId, UUID priceId, String type, LocalDateTime createdAt) {
+    public Transaction(UUID id, double quantity, UUID priceId, String type, LocalDateTime createdAt) {
         setId(id);
-        setTokenId(tokenId);
+        setQuantity(quantity);
         setPriceId(priceId);
         setType(type);
         setCreatedAt(createdAt);
@@ -22,15 +22,11 @@ public abstract class Transaction {
         return id;
     }
 
-    public UUID getTokenId() {
-        return tokenId;
-    }
-
     public UUID getPriceId() {
         return priceId;
     }
 
-    private String getType() {
+    public String getType() {
         return type;
     }
 
@@ -38,12 +34,12 @@ public abstract class Transaction {
         return createdAt;
     }
 
-    public void setId(UUID id) {
-        this.id = id;
+    public double getQuantity() {
+        return quantity;
     }
 
-    public void setTokenId(UUID tokenId) {
-        this.tokenId = tokenId;
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public void setPriceId(UUID priceId) {
@@ -54,6 +50,9 @@ public abstract class Transaction {
         this.type = type;
     }
 
+    private void setQuantity(double quantity) {
+        this.quantity = quantity;
+    }
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }

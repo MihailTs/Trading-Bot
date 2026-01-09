@@ -1,8 +1,7 @@
 package com.mihailTs.trading_bot.repository;
 
 import com.mihailTs.trading_bot.exception.ElementNotFoundException;
-import com.mihailTs.trading_bot.model.LivePrice;
-import com.mihailTs.trading_bot.model.LiveTransaction;
+import com.mihailTs.trading_bot.model.TrainingTransaction;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,23 +11,22 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.UUID;
 
-public class LiveTransactionRepository {
-
+public class TrainingTransactionRepository {
     private Connection connection;
 
-    public LiveTransactionRepository(Connection connection) {
+    public TrainingTransactionRepository(Connection connection) {
         setConnection(connection);
     }
 
-    public ArrayList<LiveTransaction> findAll() {
-        ArrayList<LiveTransaction> transactions = new ArrayList<>();
-        String sql = "SELECT * FROM \"live-transaction\"";
+    public ArrayList<TrainingTransaction> findAll() {
+        ArrayList<TrainingTransaction> transactions = new ArrayList<>();
+        String sql = "SELECT * FROM \"training-transaction\"";
 
         try (PreparedStatement stmt = connection.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                LiveTransaction transaction = new LiveTransaction(
+                TrainingTransaction transaction = new TrainingTransaction(
                         (UUID) rs.getObject("id"),
                         rs.getDouble("quantity"),
                         (UUID) rs.getObject("price_id"),
@@ -44,9 +42,9 @@ public class LiveTransactionRepository {
         return transactions;
     }
 
-    public LiveTransaction findById(UUID id) {
-        String sql = "SELECT * FROM \"live-transaction\" WHERE id = ?";
-        LiveTransaction transaction = null;
+    public TrainingTransaction findById(UUID id) {
+        String sql = "SELECT * FROM \"training-transaction\" WHERE id = ?";
+        TrainingTransaction transaction = null;
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setObject(1, id);
@@ -59,7 +57,7 @@ public class LiveTransactionRepository {
                 }
 
                 if (rs.next()) {
-                    transaction = new LiveTransaction(
+                    transaction = new TrainingTransaction(
                             (UUID) rs.getObject("id"),
                             rs.getDouble("quantity"),
                             (UUID) rs.getObject("price_id"),
@@ -75,8 +73,8 @@ public class LiveTransactionRepository {
         return transaction;
     }
 
-    public void insert(LiveTransaction transaction) {
-        String sql = "INSERT INTO \"live-transaction\" (id, quantity, price_id, type, created_at) VALUES (?, ?, ?, ?, ?)";
+    public void insert(TrainingTransaction transaction) {
+        String sql = "INSERT INTO \"training-transaction\" (id, quantity, price_id, type, created_at) VALUES (?, ?, ?, ?, ?)";
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setObject(1, transaction.getId());
@@ -98,5 +96,4 @@ public class LiveTransactionRepository {
     public Connection getConnection() {
         return connection;
     }
-
 }
