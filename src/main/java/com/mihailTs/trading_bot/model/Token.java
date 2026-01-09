@@ -8,12 +8,14 @@ public class Token {
     private String name;
     private String ticker;
     public LocalDateTime createdAt;
+    public LocalDateTime updatedAt;
 
-    public Token(UUID id, String name, String ticker, LocalDateTime createdAt) {
+    public Token(UUID id, String name, String ticker, LocalDateTime createdAt, LocalDateTime updatedAt) {
         setId(id);
         setName(name);
         setTicker(ticker);
         setCreatedAt(createdAt);
+        setUpdatedAt(updatedAt);
     }
 
     public UUID getId() {
@@ -32,6 +34,10 @@ public class Token {
         return createdAt;
     }
 
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
@@ -46,6 +52,10 @@ public class Token {
 
     public void setTicker(String ticker) {
         this.ticker = ticker;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
 }
