@@ -115,14 +115,12 @@ public class TokenRepository {
 
             int rowsDeleted = stmt.executeUpdate();
             if (rowsDeleted == 0) {
-                throw new ElementNotFoundException("No token with id " + id + " was found to delete.");
+                throw new ElementNotFoundException(String.format("No token with id %s was found to delete.", id));
             }
         } catch (SQLException | ElementNotFoundException e) {
             e.printStackTrace();
         }
     }
-
-
 
     public void setConnection(Connection connection) {
         this.connection = connection;

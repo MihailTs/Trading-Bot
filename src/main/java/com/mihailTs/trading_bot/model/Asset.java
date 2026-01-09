@@ -7,9 +7,10 @@ public abstract class Asset {
 
     private UUID tokenId;
     private double quantity;
+    private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public Asset(UUID tokenId, double quantity, LocalDateTime updatedAt) {
+    public Asset(UUID tokenId, double quantity, LocalDateTime createdAt, LocalDateTime updatedAt) {
         setTokenId(tokenId);
         setQuantity(quantity);
         setUpdatedAt(updatedAt);
@@ -27,6 +28,10 @@ public abstract class Asset {
         return updatedAt;
     }
 
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
     public void setTokenId(UUID tokenId) {
         this.tokenId = tokenId;
     }
@@ -37,6 +42,10 @@ public abstract class Asset {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
 }

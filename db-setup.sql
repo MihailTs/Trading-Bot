@@ -59,3 +59,5 @@ CREATE TABLE "live-asset" (
 ALTER TABLE "token" ADD COLUMN "created_at" timestamp;
 ALTER TABLE "token" ADD COLUMN "updated_at" timestamp;
 ALTER TABLE "token" ALTER COLUMN "name" SET NOT NULL;
+ALTER TABLE "live-asset" ADD COLUMN "created_at" timestamp;
+ALTER TABLE "training-asset" ADD COLUMN "created_at" timestamp;
