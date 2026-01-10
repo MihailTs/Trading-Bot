@@ -5,11 +5,11 @@ import java.util.UUID;
 
 public abstract class Price {
     private UUID id;
-    private UUID tokenId;
+    private int tokenId;
     private double price;
     private LocalDateTime createdAt;
 
-    public Price(UUID id, UUID tokenId, double price, LocalDateTime createdAt) {
+    public Price(UUID id, int tokenId, double price, LocalDateTime createdAt) {
         setId(id);
         setTokenId(tokenId);
         setPrice(price);
@@ -20,7 +20,7 @@ public abstract class Price {
         return id;
     }
 
-    public UUID getTokenId() {
+    public int getTokenId() {
         return tokenId;
     }
 
@@ -36,7 +36,7 @@ public abstract class Price {
         this.id = id;
     }
 
-    public void setTokenId(UUID tokenId) {
+    public void setTokenId(int tokenId) {
         this.tokenId = tokenId;
     }
 

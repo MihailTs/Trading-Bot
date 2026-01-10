@@ -4,6 +4,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -30,7 +31,7 @@ public class TokenRepository {
 
             while (rs.next()) {
                 Token token = new Token(
-                        (UUID) rs.getObject("id"),
+                        rs.getInt("id"),
                         rs.getString("name"),
                         rs.getString("ticker"),
                         rs.getBigDecimal("circulatingSupply"),
@@ -46,7 +47,24 @@ public class TokenRepository {
         return tokens;
     }
 
-    public Token findById(UUID id) {
+    public ArrayList<Integer> findAllIDs() {
+        ArrayList<Integer> ids = new ArrayList<>();
+        String sql = "SELECT * FROM token";
+
+        try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                ids.add(rs.getInt("id"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return ids;
+    }
+
+    public Token findById(int id) {
         String sql = "SELECT * FROM token WHERE id = ?";
         Token token = null;
 
@@ -62,7 +80,7 @@ public class TokenRepository {
 
                 if (rs.next()) {
                     token = new Token(
-                            (UUID) rs.getObject("id"),
+                            rs.getInt("id"),
                             rs.getString("name"),
                             rs.getString("ticker"),
                             rs.getBigDecimal("circulatingSupply"),
@@ -79,35 +97,40 @@ public class TokenRepository {
     }
 
     public void insert(Token token) {
-        String sql = "INSERT INTO token (id, name, ticker, created_at) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO token (id, name, circulating_supply, ticker, created_at, updated_at) VALUES (?, ?, ?, ?)";
 
         try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
             stmt.setObject(1, token.getId());
             stmt.setString(2, token.getName());
-            stmt.setString(3, token.getTicker());
-            stmt.setTimestamp(4, Timestamp.valueOf(token.getCreatedAt()));
-
+            stmt.setBigDecimal(3, token.getCirculatingSupply());
+            stmt.setString(4, token.getTicker());
+            stmt.setTimestamp(5, Timestamp.valueOf(token.getCreatedAt()));
+            stmt.setTimestamp(6, Timestamp.valueOf(token.getCreatedAt()));
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public void update(Token token) {
-        String sql = "UPDATE token SET name = ?, ticker = ? WHERE id = ?";
+    public Token update(Token token) {
+        String sql = "UPDATE token SET name = ?, ticker = ?, circulating_supply = ?, updated_at = ? WHERE id = ?";
 
         try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
             stmt.setString(1, token.getName());
             stmt.setString(2, token.getTicker());
-            stmt.setObject(3, token.getId());
+            stmt.setBigDecimal(3, token.getCirculatingSupply());
+            stmt.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()));
+            stmt.setObject(5, token.getId());
 
             int rowsUpdated = stmt.executeUpdate();
             if (rowsUpdated == 0) {
                 throw new ElementNotFoundException("No token with id " + token.getId() + " was found to update.");
             }
-        } catch (SQLException | ElementNotFoundException e) {
+            return token;
+        } catch (SQLException e) {
             e.printStackTrace();
         }
+        return null;
     }
 
     public void delete(UUID id) {

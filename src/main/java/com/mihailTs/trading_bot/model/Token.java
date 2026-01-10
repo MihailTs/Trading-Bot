@@ -6,14 +6,14 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class Token {
-    private UUID id;
+    private int id;
     private String name;
     private String ticker;
     public LocalDateTime createdAt;
     public LocalDateTime updatedAt;
     public BigDecimal circulatingSupply;
 
-    public Token(UUID id, String name, String ticker, BigDecimal circulatingSupply, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public Token(int id, String name, String ticker, BigDecimal circulatingSupply, LocalDateTime createdAt, LocalDateTime updatedAt) {
         setId(id);
         setName(name);
         setTicker(ticker);
@@ -22,7 +22,7 @@ public class Token {
         setCirculatingSupply(circulatingSupply);
     }
 
-    public UUID getId() {
+    public int getId() {
         return id;
     }
 
@@ -50,7 +50,7 @@ public class Token {
         this.createdAt = createdAt;
     }
 
-    public void setId(UUID id) {
+    public void setId(int id) {
         this.id = id;
     }
 

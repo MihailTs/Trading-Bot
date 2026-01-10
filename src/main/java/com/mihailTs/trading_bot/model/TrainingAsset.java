@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class TrainingAsset extends Asset{
-    public TrainingAsset(UUID tokenId, double quantity, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public TrainingAsset(int tokenId, double quantity, LocalDateTime createdAt, LocalDateTime updatedAt) {
         super(tokenId, quantity, createdAt, updatedAt);
     }
 }

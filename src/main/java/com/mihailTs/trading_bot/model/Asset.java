@@ -5,18 +5,18 @@ import java.util.UUID;
 
 public abstract class Asset {
 
-    private UUID tokenId;
+    private int tokenId;
     private double quantity;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public Asset(UUID tokenId, double quantity, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public Asset(int tokenId, double quantity, LocalDateTime createdAt, LocalDateTime updatedAt) {
         setTokenId(tokenId);
         setQuantity(quantity);
         setUpdatedAt(updatedAt);
     }
 
-    public UUID getTokenId() {
+    public int getTokenId() {
         return tokenId;
     }
 
@@ -32,7 +32,7 @@ public abstract class Asset {
         return createdAt;
     }
 
-    public void setTokenId(UUID tokenId) {
+    public void setTokenId(int tokenId) {
         this.tokenId = tokenId;
     }
 

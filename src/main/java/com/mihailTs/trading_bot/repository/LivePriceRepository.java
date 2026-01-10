@@ -1,9 +1,11 @@
 package com.mihailTs.trading_bot.repository;
 
+import com.mihailTs.trading_bot.config.DatabaseConfig;
 import com.mihailTs.trading_bot.exception.ElementNotFoundException;
 import com.mihailTs.trading_bot.model.LiveAsset;
 import com.mihailTs.trading_bot.model.LivePrice;
 import com.mihailTs.trading_bot.model.Token;
+import org.springframework.stereotype.Repository;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,18 +15,18 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.UUID;
 
+@Repository
 public class LivePriceRepository {
-    private Connection connection;
-
-    public LivePriceRepository(Connection connection) {
-        setConnection(connection);
+    private DatabaseConfig databaseConfig;
+    public LivePriceRepository(DatabaseConfig databaseConfig) {
+        this.databaseConfig = databaseConfig;
     }
 
     public ArrayList<LivePrice> findAll() {
         ArrayList<LivePrice> prices = new ArrayList<>();
         String sql = "SELECT * FROM \"live-price\"";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql);
+        try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
@@ -47,7 +49,7 @@ public class LivePriceRepository {
         String sql = "SELECT * FROM \"live-price\" WHERE id = ?";
         LivePrice price = null;
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
             stmt.setObject(1, id);  // Safe UUID parameter
 
             try (ResultSet rs = stmt.executeQuery()) {
@@ -76,7 +78,7 @@ public class LivePriceRepository {
     public void insert(LivePrice price) {
         String sql = "INSERT INTO \"live-price\" (id, token_id, price, created_at) VALUES (?, ?, ?, ?)";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
             stmt.setObject(1, price.getId());
             stmt.setObject(2, price.getTokenId());
             stmt.setDouble(3, price.getPrice());
@@ -86,14 +88,6 @@ public class LivePriceRepository {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-    public void setConnection(Connection connection) {
-        this.connection = connection;
-    }
-
-    public Connection getConnection() {
-        return connection;
     }
 
 }

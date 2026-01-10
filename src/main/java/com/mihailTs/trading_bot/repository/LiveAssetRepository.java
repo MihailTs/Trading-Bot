@@ -1,8 +1,10 @@
 package com.mihailTs.trading_bot.repository;
 
+import com.mihailTs.trading_bot.config.DatabaseConfig;
 import com.mihailTs.trading_bot.exception.ElementNotFoundException;
 import com.mihailTs.trading_bot.model.LiveAsset;
 import com.mihailTs.trading_bot.model.Token;
+import org.springframework.stereotype.Repository;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,19 +15,18 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.UUID;
 
+@Repository
 public class LiveAssetRepository {
 
-    private Connection connection;
-
-    public LiveAssetRepository(Connection connection) {
-        setConnection(connection);
+    private DatabaseConfig databaseConfig;
+    public LiveAssetRepository(DatabaseConfig databaseConfig) {
+        this.databaseConfig = databaseConfig;
     }
-
     public ArrayList<LiveAsset> findAll() {
         ArrayList<LiveAsset> assets = new ArrayList<>();
         String sql = "SELECT * FROM \"live-asset\"";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql);
+        try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
@@ -48,7 +49,7 @@ public class LiveAssetRepository {
         String sql = "SELECT * FROM \"live-asset\" WHERE token_id = ?";
         LiveAsset asset = null;
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
             stmt.setObject(1, tokenId);
 
             try (ResultSet rs = stmt.executeQuery()) {
@@ -77,7 +78,7 @@ public class LiveAssetRepository {
     public void insert(LiveAsset asset) {
         String sql = "INSERT INTO \"live-asset\" (token_id, quantity, created_at, updated_at) VALUES (?, ?, ?, ?)";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
             stmt.setObject(1, asset.getTokenId());
             stmt.setDouble(2, asset.getQuantity());
             stmt.setTimestamp(3, Timestamp.valueOf(asset.getCreatedAt()));
@@ -92,7 +93,7 @@ public class LiveAssetRepository {
     public void update(UUID tokenId, double quantity, Timestamp updatedAt) {
         String sql = "UPDATE \"live-asset\" SET quantity = ?, updated_at = ? WHERE token_id = ?";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
             stmt.setDouble(1, quantity);
             stmt.setTimestamp(2, updatedAt);
             stmt.setObject(3, tokenId);
@@ -110,7 +111,7 @@ public class LiveAssetRepository {
         String sql = "DELETE FROM \"live-asset\" WHERE token_id = ?";
         int rowsDeleted = 0;
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
             stmt.setObject(1, tokenId);
 
             rowsDeleted = stmt.executeUpdate();
@@ -122,14 +123,6 @@ public class LiveAssetRepository {
         }
 
         return rowsDeleted;
-    }
-
-    public void setConnection(Connection connection) {
-        this.connection = connection;
-    }
-
-    public Connection getConnection() {
-        return connection;
     }
 
 }

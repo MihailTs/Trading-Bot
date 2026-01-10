@@ -1,6 +1,7 @@
 package com.mihailTs.trading_bot.service;
 
 
+import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -20,10 +21,9 @@ public class BotService {
     }
 
     @Scheduled(fixedRate = 20000)
-    public void run() {
-        System.out.println("Working");
-//        fetchNewData();
-//        takeAction();
+    @Order(1)
+    public void fetchNewestData() {
+
     }
 
 

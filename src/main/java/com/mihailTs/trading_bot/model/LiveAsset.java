@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class LiveAsset extends Asset{
-    public LiveAsset(UUID tokenId, double quantity, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public LiveAsset(int tokenId, double quantity, LocalDateTime createdAt, LocalDateTime updatedAt) {
         super(tokenId, quantity, createdAt, updatedAt);
     }
 }
