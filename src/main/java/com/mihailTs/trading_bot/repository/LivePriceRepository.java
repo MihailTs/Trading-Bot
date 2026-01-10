@@ -2,12 +2,9 @@ package com.mihailTs.trading_bot.repository;
 
 import com.mihailTs.trading_bot.config.DatabaseConfig;
 import com.mihailTs.trading_bot.exception.ElementNotFoundException;
-import com.mihailTs.trading_bot.model.LiveAsset;
 import com.mihailTs.trading_bot.model.LivePrice;
-import com.mihailTs.trading_bot.model.Token;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -75,7 +72,7 @@ public class LivePriceRepository {
         return price;
     }
 
-    public void insert(LivePrice price) {
+    public LivePrice insert(LivePrice price) {
         String sql = "INSERT INTO \"live-price\" (id, token_id, price, created_at) VALUES (?, ?, ?, ?)";
 
         try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
@@ -88,6 +85,7 @@ public class LivePriceRepository {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return price;
     }
 
 }

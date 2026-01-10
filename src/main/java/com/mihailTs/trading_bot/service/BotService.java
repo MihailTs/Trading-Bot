@@ -1,6 +1,7 @@
 package com.mihailTs.trading_bot.service;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -48,21 +49,28 @@ public class BotService {
             return;
         }
 
-        String jsonResponseString = getJSONResponse(tokenIDs);
+        String jsonResponse = getJSONResponse(tokenIDs);
+        parseJSONResponse(jsonResponse);
 
-        JsonNode root = mapper.readTree(jsonResponseString);
+    }
+
+    private void parseJSONResponse(String jsonResponse) throws JsonProcessingException {
+        JsonNode root = mapper.readTree(jsonResponse);
         JsonNode tokensNode = root.path("data");
 
         if (tokensNode.isObject()) {
             for (String fieldName : iterable(tokensNode.fieldNames())) {
                 JsonNode tokenNode = tokensNode.get(fieldName);
 
+                // TODO: error handling for missing data
                 int id = tokenNode.path("id").asInt();
                 String name = tokenNode.path("name").asText();
                 String symbol = tokenNode.path("symbol").asText();
                 BigDecimal circulatingSupply = tokenNode.path("circulating_supply").decimalValue();
                 BigDecimal price = tokenNode.path("quote").path("USD").path("price").decimalValue();
-                System.out.printf("%d %s %s %s %f%n", id, name, symbol, circulatingSupply, price);
+
+                tokenService.updateTokenCirculatingSupply(id, circulatingSupply);
+                livePriceService.saveNewPrice(price, id);
             }
         }
     }

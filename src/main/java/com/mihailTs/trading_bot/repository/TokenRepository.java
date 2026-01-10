@@ -64,36 +64,30 @@ public class TokenRepository {
         return ids;
     }
 
-    public Token findById(int id) {
+    public Token findById(int id) throws ElementNotFoundException {
         String sql = "SELECT * FROM token WHERE id = ?";
-        Token token = null;
-
         try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
-            stmt.setObject(1, id);  // Safe UUID parameter
+            stmt.setInt(1, id);
 
             try (ResultSet rs = stmt.executeQuery()) {
-                if (!rs.isBeforeFirst()) {
+                if (!rs.next()) {
                     throw new ElementNotFoundException(
-                            String.format("No token with id %s was found", id)
+                            String.format("No token with id %d was found", id)
                     );
                 }
 
-                if (rs.next()) {
-                    token = new Token(
-                            rs.getInt("id"),
-                            rs.getString("name"),
-                            rs.getString("ticker"),
-                            rs.getBigDecimal("circulatingSupply"),
-                            rs.getTimestamp("created_at").toLocalDateTime(),
-                            rs.getTimestamp("updated_at").toLocalDateTime()
-                    );
-                }
+                return new Token(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("ticker"),
+                        rs.getBigDecimal("circulating_supply"),
+                        rs.getTimestamp("created_at").toLocalDateTime(),
+                        rs.getTimestamp("updated_at").toLocalDateTime()
+                );
             }
-        } catch (SQLException | ElementNotFoundException e) {
-            e.printStackTrace();
+        } catch (SQLException e) {
+            throw new RuntimeException("Database error while fetching token", e);
         }
-
-        return token;
     }
 
     public void insert(Token token) {
@@ -124,7 +118,9 @@ public class TokenRepository {
 
             int rowsUpdated = stmt.executeUpdate();
             if (rowsUpdated == 0) {
-                throw new ElementNotFoundException("No token with id " + token.getId() + " was found to update.");
+                throw new ElementNotFoundException(
+                        String.format("No token with id %s was found to update.", token.getId())
+                );
             }
             return token;
         } catch (SQLException e) {

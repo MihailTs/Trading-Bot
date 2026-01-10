@@ -13,7 +13,7 @@ import java.util.List;
 @Service
 public class TokenService {
 
-    private TokenRepository tokenRepository;
+    private final TokenRepository tokenRepository;
 
     public TokenService(TokenRepository tokenRepository) {
         this.tokenRepository = tokenRepository;
