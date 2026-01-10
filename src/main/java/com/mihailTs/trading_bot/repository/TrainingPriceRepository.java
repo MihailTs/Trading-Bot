@@ -28,8 +28,8 @@ public class TrainingPriceRepository {
             while (rs.next()) {
                 TrainingPrice price = new TrainingPrice(
                         (UUID) rs.getObject("id"),
-                        (UUID) rs.getObject("token_id"),
-                        rs.getDouble("price"),
+                        rs.getInt("token_id"),
+                        rs.getBigDecimal("price"),
                         rs.getTimestamp("created_at").toLocalDateTime()
                 );
                 prices.add(price);
@@ -58,8 +58,8 @@ public class TrainingPriceRepository {
                 if (rs.next()) {
                     price = new TrainingPrice(
                             (UUID) rs.getObject("id"),
-                            (UUID) rs.getObject("token_id"),
-                            rs.getDouble("price"),
+                            rs.getInt("token_id"),
+                            rs.getBigDecimal("price"),
                             rs.getTimestamp("created_at").toLocalDateTime()
                     );
                 }
@@ -77,7 +77,7 @@ public class TrainingPriceRepository {
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setObject(1, price.getId());
             stmt.setObject(2, price.getTokenId());
-            stmt.setDouble(3, price.getPrice());
+            stmt.setBigDecimal(3, price.getPrice());
             stmt.setTimestamp(4, Timestamp.valueOf(price.getCreatedAt()));
 
             stmt.executeUpdate();

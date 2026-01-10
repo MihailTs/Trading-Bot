@@ -31,7 +31,7 @@ public class LiveAssetRepository {
 
             while (rs.next()) {
                 LiveAsset asset = new LiveAsset(
-                        (UUID) rs.getObject("token_id"),
+                        rs.getInt("token_id"),
                         rs.getDouble("quantity"),
                         rs.getTimestamp("created_at").toLocalDateTime(),
                         rs.getTimestamp("updated_at").toLocalDateTime()
@@ -61,7 +61,7 @@ public class LiveAssetRepository {
 
                 if (rs.next()) {
                     asset = new LiveAsset(
-                            (UUID) rs.getObject("token_id"),
+                            rs.getInt("token_id"),
                             rs.getDouble("quantity"),
                             rs.getTimestamp("created_at").toLocalDateTime(),
                             rs.getTimestamp("updated_at").toLocalDateTime()

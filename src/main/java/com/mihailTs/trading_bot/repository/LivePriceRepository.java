@@ -32,8 +32,8 @@ public class LivePriceRepository {
             while (rs.next()) {
                 LivePrice price = new LivePrice(
                         (UUID) rs.getObject("id"),
-                        (UUID) rs.getObject("token_id"),
-                        rs.getDouble("price"),
+                        rs.getInt("token_id"),
+                        rs.getBigDecimal("price"),
                         rs.getTimestamp("created_at").toLocalDateTime()
                 );
                 prices.add(price);
@@ -62,8 +62,8 @@ public class LivePriceRepository {
                 if (rs.next()) {
                     price = new LivePrice(
                             (UUID) rs.getObject("id"),
-                            (UUID) rs.getObject("token_id"),
-                            rs.getDouble("price"),
+                            rs.getInt("token_id"),
+                            rs.getBigDecimal("price"),
                             rs.getTimestamp("created_at").toLocalDateTime()
                     );
                 }
@@ -81,7 +81,7 @@ public class LivePriceRepository {
         try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
             stmt.setObject(1, price.getId());
             stmt.setObject(2, price.getTokenId());
-            stmt.setDouble(3, price.getPrice());
+            stmt.setBigDecimal(3, price.getPrice());
             stmt.setTimestamp(4, Timestamp.valueOf(price.getCreatedAt()));
 
             stmt.executeUpdate();

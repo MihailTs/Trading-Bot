@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -19,11 +20,27 @@ public class TokenService {
     }
 
     public List<Token> getAll() {
-        return tokenRepository.findAll();
+        try {
+            return tokenRepository.findAll();
+        } catch (ElementNotFoundException e) {
+            return new ArrayList<>();
+        }
     }
 
     public Token getTokenById(int id) {
-        return tokenRepository.findById(id);
+        try {
+            return tokenRepository.findById(id);
+        } catch (ElementNotFoundException e) {
+            return null;
+        }
+    }
+
+    public ArrayList<Integer> getTokenIds() {
+        try {
+            return tokenRepository.findAllIDs();
+        } catch (ElementNotFoundException e) {
+            return new ArrayList<>();
+        }
     }
 
     public Token updateTokenCirculatingSupply(int id, BigDecimal circulatingSupply) {

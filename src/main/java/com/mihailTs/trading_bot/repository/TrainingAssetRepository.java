@@ -28,7 +28,7 @@ public class TrainingAssetRepository {
 
             while (rs.next()) {
                 TrainingAsset asset = new TrainingAsset(
-                        (UUID) rs.getObject("token_id"),
+                        rs.getInt("token_id"),
                         rs.getDouble("quantity"),
                         rs.getTimestamp("created_at").toLocalDateTime(),
                         rs.getTimestamp("updated_at").toLocalDateTime()
@@ -58,7 +58,7 @@ public class TrainingAssetRepository {
 
                 if (rs.next()) {
                     asset = new TrainingAsset(
-                            (UUID) rs.getObject("token_id"),
+                            rs.getInt("token_id"),
                             rs.getDouble("quantity"),
                             rs.getTimestamp("created_at").toLocalDateTime(),
                             rs.getTimestamp("updated_at").toLocalDateTime()

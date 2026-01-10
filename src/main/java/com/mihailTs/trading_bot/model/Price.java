@@ -1,15 +1,16 @@
 package com.mihailTs.trading_bot.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 public abstract class Price {
     private UUID id;
     private int tokenId;
-    private double price;
+    private BigDecimal price;
     private LocalDateTime createdAt;
 
-    public Price(UUID id, int tokenId, double price, LocalDateTime createdAt) {
+    public Price(UUID id, int tokenId, BigDecimal price, LocalDateTime createdAt) {
         setId(id);
         setTokenId(tokenId);
         setPrice(price);
@@ -24,7 +25,7 @@ public abstract class Price {
         return tokenId;
     }
 
-    public double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
@@ -40,7 +41,7 @@ public abstract class Price {
         this.tokenId = tokenId;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 
