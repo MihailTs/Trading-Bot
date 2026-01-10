@@ -64,3 +64,23 @@ ALTER TABLE "training-asset" ADD COLUMN "created_at" timestamp;
 
 ALTER TABLE "training-transaction" DROP COLUMN "token_id";
 ALTER TABLE "live-transaction" DROP COLUMN "token_id";
+ALTER TABLE "token" ADD COLUMN "circulating_supply" decimal;
+
+INSERT INTO "token" (name, ticker, circulating_supply, created_at, updated_at)
+VALUES ('Bitcoin', 'BTC', 19974018, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "token" (name, ticker, circulating_supply, created_at, updated_at)
+VALUES ('Ethereum', 'ETH', 120694733.7402891, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "token" (name, ticker, circulating_supply, created_at, updated_at)
+VALUES ('Tether USDt', 'USDT', 186966394639.43137, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "token" (name, ticker, circulating_supply, created_at, updated_at)
+VALUES ('XRP', 'XRP', 60699967552, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "token" (name, ticker, circulating_supply, created_at, updated_at)
+VALUES ('BNB', 'BNB', 137734106.82999998, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "token" (name, ticker, circulating_supply, created_at, updated_at)
+VALUES ('Solana', 'SOL', 564261938.2380047, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "token" (name, ticker, circulating_supply, created_at, updated_at)
+VALUES ('USDC', 'USDC', 74754621689.3042, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "token" (name, ticker, circulating_supply, created_at, updated_at)
+VALUES ('Tron', 'TRX', 94701724892.11887, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "token" (name, ticker, circulating_supply, created_at, updated_at)
+VALUES ('Dogecoin', 'DOGE', 168257143126.5791, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);

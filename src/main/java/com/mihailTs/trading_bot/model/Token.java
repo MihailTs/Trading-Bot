@@ -1,5 +1,7 @@
 package com.mihailTs.trading_bot.model;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -9,13 +11,15 @@ public class Token {
     private String ticker;
     public LocalDateTime createdAt;
     public LocalDateTime updatedAt;
+    public BigDecimal circulatingSupply;
 
-    public Token(UUID id, String name, String ticker, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public Token(UUID id, String name, String ticker, BigDecimal circulatingSupply, LocalDateTime createdAt, LocalDateTime updatedAt) {
         setId(id);
         setName(name);
         setTicker(ticker);
         setCreatedAt(createdAt);
         setUpdatedAt(updatedAt);
+        setCirculatingSupply(circulatingSupply);
     }
 
     public UUID getId() {
@@ -38,6 +42,10 @@ public class Token {
         return updatedAt;
     }
 
+    public BigDecimal getCirculatingSupply() {
+        return circulatingSupply;
+    }
+
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
@@ -56,6 +64,10 @@ public class Token {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public void setCirculatingSupply(BigDecimal circulatingSupply) {
+        this.circulatingSupply = circulatingSupply;
     }
 
 }

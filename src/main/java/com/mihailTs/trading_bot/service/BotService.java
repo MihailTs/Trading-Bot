@@ -19,10 +19,11 @@ public class BotService {
         this.liveAssetService = liveAssetService;
     }
 
-    @Scheduled(fixedRate = 10000)
+    @Scheduled(fixedRate = 20000)
     public void run() {
-        fetchNewData();
-        takeAction();
+        System.out.println("Working");
+//        fetchNewData();
+//        takeAction();
     }
 
 
