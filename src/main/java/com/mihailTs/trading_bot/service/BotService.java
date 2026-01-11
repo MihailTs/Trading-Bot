@@ -1,26 +1,22 @@
 package com.mihailTs.trading_bot.service;
 
-
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.mihailTs.trading_bot.websocket.TokenPriceWebSocketHandler;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Map;
 
 @Service
 public class BotService {
@@ -30,18 +26,23 @@ public class BotService {
     private TokenService tokenService;
     private LivePriceService livePriceService;
     private LiveAssetService liveAssetService;
-    private static final ObjectMapper mapper = new ObjectMapper();
+    private TokenPriceWebSocketHandler tokenPriceWebSocketHandler;
+    private ObjectMapper objectMapper;
 
     public BotService(TokenService tokenService,
                       LivePriceService livePriceService,
-                      LiveAssetService liveAssetService) {
+                      LiveAssetService liveAssetService,
+                      TokenPriceWebSocketHandler tokenPriceWebSocketHandler,
+                      ObjectMapper objectMapper) {
         this.tokenService = tokenService;
         this.livePriceService = livePriceService;
         this.liveAssetService = liveAssetService;
+        this.tokenPriceWebSocketHandler = tokenPriceWebSocketHandler;
+        this.objectMapper = objectMapper;
     }
 
-    @Scheduled(fixedRate = 20000)
-    @Order(1)
+    // API data changes every ~1 minute
+    @Scheduled(fixedRate = 55000)
     public void fetchNewestData() throws IOException {
         ArrayList<Integer> tokenIDs = tokenService.getTokenIds();
 
@@ -52,10 +53,14 @@ public class BotService {
         String jsonResponse = getJSONResponse(tokenIDs);
         parseJSONResponse(jsonResponse);
 
+        for(Integer id : tokenIDs) {
+            tokenPriceWebSocketHandler.broadcastToken(id);
+        }
+
     }
 
     private void parseJSONResponse(String jsonResponse) throws JsonProcessingException {
-        JsonNode root = mapper.readTree(jsonResponse);
+        JsonNode root = objectMapper.readTree(jsonResponse);
         JsonNode tokensNode = root.path("data");
 
         if (tokensNode.isObject()) {
@@ -90,8 +95,6 @@ public class BotService {
         String idParams = getIdParams(tokenIDs);
         String urlStr =
                 "https://pro-api.coinmarketcap.com/v2/cryptocurrency/quotes/latest?id=" + idParams;
-
-        System.out.println(urlStr);
 
         URL url = new URL(urlStr);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();

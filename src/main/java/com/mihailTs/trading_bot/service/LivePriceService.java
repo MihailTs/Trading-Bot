@@ -14,8 +14,8 @@ import java.util.UUID;
 @Service
 public class LivePriceService {
 
-    private TokenRepository tokenRepository;
-    private LivePriceRepository livePriceRepository;
+    private final TokenRepository tokenRepository;
+    private final LivePriceRepository livePriceRepository;
 
     public LivePriceService(LivePriceRepository livePriceRepository, TokenRepository tokenRepository) {
         this.livePriceRepository = livePriceRepository;
@@ -27,6 +27,18 @@ public class LivePriceService {
             Token token = tokenRepository.findById(tokenId);
             LivePrice newPrice = new LivePrice(UUID.randomUUID(), tokenId, price, LocalDateTime.now());
             return livePriceRepository.insert(newPrice);
+        } catch (ElementNotFoundException e) {
+            // TODO: better exception handling
+            System.err.println("Token not found: " + e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to save new price", e);
+        }
+    }
+
+    public LivePrice getLatestPrice(int tokenId) {
+        try {
+            return livePriceRepository.getPriceByTokenId(tokenId);
         } catch (ElementNotFoundException e) {
             // TODO: better exception handling
             System.err.println("Token not found: " + e.getMessage());

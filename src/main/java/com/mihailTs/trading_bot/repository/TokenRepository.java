@@ -34,7 +34,7 @@ public class TokenRepository {
                         rs.getInt("id"),
                         rs.getString("name"),
                         rs.getString("ticker"),
-                        rs.getBigDecimal("circulatingSupply"),
+                        rs.getBigDecimal("circulating_supply"),
                         rs.getTimestamp("created_at").toLocalDateTime(),
                         rs.getTimestamp("updated_at").toLocalDateTime()
                 );

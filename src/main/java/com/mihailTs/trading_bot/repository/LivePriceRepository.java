@@ -88,4 +88,34 @@ public class LivePriceRepository {
         return price;
     }
 
+    public LivePrice getPriceByTokenId(int tokenId) {
+        String sql = "SELECT * FROM \"live-price\" WHERE token_id = ? ORDER BY created_at DESC LIMIT 1";
+        LivePrice price = null;
+
+        try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
+            stmt.setObject(1, tokenId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (!rs.isBeforeFirst()) {
+                    throw new ElementNotFoundException(
+                            String.format("No token with id %s was found", tokenId)
+                    );
+                }
+
+                if (rs.next()) {
+                    price = new LivePrice(
+                            (UUID) rs.getObject("id"),
+                            rs.getInt("token_id"),
+                            rs.getBigDecimal("price"),
+                            rs.getTimestamp("created_at").toLocalDateTime()
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return price;
+    }
+
 }
