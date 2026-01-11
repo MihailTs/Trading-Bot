@@ -10,11 +10,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Repository
 public class LivePriceRepository {
-    private DatabaseConfig databaseConfig;
+    private final DatabaseConfig databaseConfig;
     public LivePriceRepository(DatabaseConfig databaseConfig) {
         this.databaseConfig = databaseConfig;
     }
@@ -116,6 +117,33 @@ public class LivePriceRepository {
         }
 
         return price;
+    }
+
+    public List<LivePrice> getPriceHistoryForDays(String tokenId, int days) {
+        String sql = "SELECT * FROM \"live-price\" " +
+                "WHERE token_id = ? AND created_at > NOW() - INTERVAL '1 day' * ? ORDER BY created_at ASC";
+        List<LivePrice> prices = new ArrayList<>();
+
+        try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
+            stmt.setString(1, tokenId);
+            stmt.setInt(2, days);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    LivePrice price = new LivePrice(
+                            (UUID) rs.getObject("id"),
+                            rs.getString("token_id"),
+                            rs.getBigDecimal("price"),
+                            rs.getTimestamp("created_at").toLocalDateTime()
+                    );
+                    prices.add(price);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return prices;
     }
 
 }

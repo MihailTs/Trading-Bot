@@ -38,9 +38,6 @@ public class TokenController {
                     );
                 })
                 .collect(Collectors.toList());
-        for(TokenWithPriceDto t : tokens) {
-            System.out.println(t.getName());
-        }
         return ResponseEntity.ok(tokens);
     }
 
