@@ -28,7 +28,7 @@ public class TrainingAssetRepository {
 
             while (rs.next()) {
                 TrainingAsset asset = new TrainingAsset(
-                        rs.getInt("token_id"),
+                        rs.getString("token_id"),
                         rs.getDouble("quantity"),
                         rs.getTimestamp("created_at").toLocalDateTime(),
                         rs.getTimestamp("updated_at").toLocalDateTime()
@@ -58,7 +58,7 @@ public class TrainingAssetRepository {
 
                 if (rs.next()) {
                     asset = new TrainingAsset(
-                            rs.getInt("token_id"),
+                            rs.getString("token_id"),
                             rs.getDouble("quantity"),
                             rs.getTimestamp("created_at").toLocalDateTime(),
                             rs.getTimestamp("updated_at").toLocalDateTime()
@@ -76,7 +76,7 @@ public class TrainingAssetRepository {
         String sql = "INSERT INTO \"training-asset\" (token_id, quantity, created_at, updated_at) VALUES (?, ?, ?, ?)";
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setObject(1, asset.getTokenId());
+            stmt.setString(1, asset.getTokenId());
             stmt.setDouble(2, asset.getQuantity());
             stmt.setTimestamp(3, Timestamp.valueOf(asset.getCreatedAt()));
             stmt.setTimestamp(4, Timestamp.valueOf(asset.getUpdatedAt()));
@@ -87,13 +87,13 @@ public class TrainingAssetRepository {
         }
     }
 
-    public void update(UUID tokenId, double quantity, Timestamp updatedAt) {
+    public void update(String tokenId, double quantity, Timestamp updatedAt) {
         String sql = "UPDATE \"training-asset\" SET quantity = ?, updated_at = ? WHERE token_id = ?";
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setDouble(1, quantity);
             stmt.setTimestamp(2, updatedAt);
-            stmt.setObject(3, tokenId);
+            stmt.setString(3, tokenId);
 
             int rowsUpdated = stmt.executeUpdate();
             if (rowsUpdated == 0) {
@@ -106,12 +106,12 @@ public class TrainingAssetRepository {
         }
     }
 
-    public int delete(UUID tokenId) {
+    public int delete(String tokenId) {
         String sql = "DELETE FROM \"training-asset\" WHERE token_id = ?";
         int rowsDeleted = 0;
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setObject(1, tokenId);
+            stmt.setString(1, tokenId);
 
             rowsDeleted = stmt.executeUpdate();
             if (rowsDeleted == 0) {

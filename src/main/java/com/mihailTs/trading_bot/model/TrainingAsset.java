@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class TrainingAsset extends Asset{
-    public TrainingAsset(int tokenId, double quantity, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public TrainingAsset(String tokenId, double quantity, LocalDateTime createdAt, LocalDateTime updatedAt) {
         super(tokenId, quantity, createdAt, updatedAt);
     }
 }

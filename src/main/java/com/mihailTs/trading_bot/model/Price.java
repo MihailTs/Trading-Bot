@@ -13,7 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public abstract class Price {
     private UUID id;
-    private int tokenId;
+    private String tokenId;
     private BigDecimal price;
     private LocalDateTime createdAt;
 }

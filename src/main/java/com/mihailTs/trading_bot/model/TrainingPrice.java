@@ -10,7 +10,7 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class TrainingPrice extends Price{
-    public TrainingPrice(UUID id, int tokenId, BigDecimal price, LocalDateTime createdAt) {
+    public TrainingPrice(UUID id, String tokenId, BigDecimal price, LocalDateTime createdAt) {
         super(id, tokenId, price, createdAt);
     }
 }

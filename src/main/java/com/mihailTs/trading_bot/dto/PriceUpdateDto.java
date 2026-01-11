@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 public class PriceUpdateDto {
-    private Long tokenId;
+    private String tokenId;
     private Double price;
     private LocalDateTime timestamp;
 }

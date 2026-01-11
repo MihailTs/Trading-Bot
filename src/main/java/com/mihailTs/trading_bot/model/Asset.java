@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public abstract class Asset {
-    private int tokenId;
+    private String tokenId;
     private double quantity;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

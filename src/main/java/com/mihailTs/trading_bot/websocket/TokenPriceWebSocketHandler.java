@@ -37,20 +37,15 @@ public class TokenPriceWebSocketHandler extends TextWebSocketHandler {
 
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         sessions.add(session);
-        System.out.println("Client connected: " + session.getId());
-        System.out.println("Total connections: " + sessions.size());
     }
 
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status)
             throws Exception {
         sessions.remove(session);
-        System.out.println("Client disconnected: " + session.getId());
-        System.out.println("Total connections: " + sessions.size());
     }
 
-    public void broadcastToken(int tokenId) {
+    public void broadcastToken(String tokenId) {
         if (sessions.isEmpty()) {
-            System.out.println("No clients connected");
             return;
         }
 

@@ -31,7 +31,7 @@ public class LiveAssetRepository {
 
             while (rs.next()) {
                 LiveAsset asset = new LiveAsset(
-                        rs.getInt("token_id"),
+                        rs.getString("token_id"),
                         rs.getDouble("quantity"),
                         rs.getTimestamp("created_at").toLocalDateTime(),
                         rs.getTimestamp("updated_at").toLocalDateTime()
@@ -61,7 +61,7 @@ public class LiveAssetRepository {
 
                 if (rs.next()) {
                     asset = new LiveAsset(
-                            rs.getInt("token_id"),
+                            rs.getString("token_id"),
                             rs.getDouble("quantity"),
                             rs.getTimestamp("created_at").toLocalDateTime(),
                             rs.getTimestamp("updated_at").toLocalDateTime()
@@ -79,7 +79,7 @@ public class LiveAssetRepository {
         String sql = "INSERT INTO \"live-asset\" (token_id, quantity, created_at, updated_at) VALUES (?, ?, ?, ?)";
 
         try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
-            stmt.setObject(1, asset.getTokenId());
+            stmt.setString(1, asset.getTokenId());
             stmt.setDouble(2, asset.getQuantity());
             stmt.setTimestamp(3, Timestamp.valueOf(asset.getCreatedAt()));
             stmt.setTimestamp(4, Timestamp.valueOf(asset.getUpdatedAt()));

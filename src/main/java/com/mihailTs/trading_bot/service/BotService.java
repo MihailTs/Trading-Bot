@@ -16,13 +16,17 @@ import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 @Service
 public class BotService {
 
     @Value("${crypto.api.key}")
     private String apiKey;
+    @Value("${crypto.api.token-prices.url}")
+    private String tokenPricesURL;
     private TokenService tokenService;
     private LivePriceService livePriceService;
     private LiveAssetService liveAssetService;
@@ -42,9 +46,9 @@ public class BotService {
     }
 
     // API data changes every ~1 minute
-    @Scheduled(fixedRate = 55000)
-    public void fetchNewestData() throws IOException {
-        ArrayList<Integer> tokenIDs = tokenService.getTokenIds();
+    @Scheduled(fixedRate = 30000)
+    public void fetchNewestData() throws IOException, InterruptedException {
+        List<String> tokenIDs = tokenService.getTokenIds();
 
         if (tokenIDs.isEmpty()) {
             return;
@@ -53,7 +57,7 @@ public class BotService {
         String jsonResponse = getJSONResponse(tokenIDs);
         parseJSONResponse(jsonResponse);
 
-        for(Integer id : tokenIDs) {
+        for(String id : tokenIDs) {
             tokenPriceWebSocketHandler.broadcastToken(id);
         }
 
@@ -61,18 +65,12 @@ public class BotService {
 
     private void parseJSONResponse(String jsonResponse) throws JsonProcessingException {
         JsonNode root = objectMapper.readTree(jsonResponse);
-        JsonNode tokensNode = root.path("data");
 
-        if (tokensNode.isObject()) {
-            for (String fieldName : iterable(tokensNode.fieldNames())) {
-                JsonNode tokenNode = tokensNode.get(fieldName);
-
-                // TODO: error handling for missing data
-                int id = tokenNode.path("id").asInt();
-                String name = tokenNode.path("name").asText();
-                String symbol = tokenNode.path("symbol").asText();
+        if (root.isArray()) {
+            for (JsonNode tokenNode : root) {
+                String id = tokenNode.path("id").asText();
                 BigDecimal circulatingSupply = tokenNode.path("circulating_supply").decimalValue();
-                BigDecimal price = tokenNode.path("quote").path("USD").path("price").decimalValue();
+                BigDecimal price = tokenNode.path("current_price").decimalValue();
 
                 tokenService.updateTokenCirculatingSupply(id, circulatingSupply);
                 livePriceService.saveNewPrice(price, id);
@@ -80,7 +78,7 @@ public class BotService {
         }
     }
 
-    private String getIdParams(ArrayList<Integer> ids) {
+    private String getIdParams(List<String> ids) {
         StringBuilder stringBuilder = new StringBuilder();
         for(int i = 0; i < ids.size(); i++) {
             stringBuilder.append(ids.get(i));
@@ -91,10 +89,9 @@ public class BotService {
         return stringBuilder.toString();
     }
 
-    private String getJSONResponse(ArrayList<Integer> tokenIDs) throws IOException {
+    private String getJSONResponse(List<String> tokenIDs) throws IOException {
         String idParams = getIdParams(tokenIDs);
-        String urlStr =
-                "https://pro-api.coinmarketcap.com/v2/cryptocurrency/quotes/latest?id=" + idParams;
+        String urlStr = tokenPricesURL + "&ids=" + idParams;
 
         URL url = new URL(urlStr);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();

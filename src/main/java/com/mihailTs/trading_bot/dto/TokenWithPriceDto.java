@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 public class TokenWithPriceDto {
-    private int id;
+    private String id;
     private String name;
     private String ticker;
     private BigDecimal currentPrice;

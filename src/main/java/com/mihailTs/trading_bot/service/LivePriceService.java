@@ -2,7 +2,6 @@ package com.mihailTs.trading_bot.service;
 
 import com.mihailTs.trading_bot.exception.ElementNotFoundException;
 import com.mihailTs.trading_bot.model.LivePrice;
-import com.mihailTs.trading_bot.model.Token;
 import com.mihailTs.trading_bot.repository.LivePriceRepository;
 import com.mihailTs.trading_bot.repository.TokenRepository;
 import org.springframework.stereotype.Service;
@@ -22,11 +21,11 @@ public class LivePriceService {
         this.tokenRepository = tokenRepository;
     }
 
-    public LivePrice saveNewPrice(BigDecimal price, int tokenId) {
+    public void saveNewPrice(BigDecimal price, String tokenId) {
         try {
-            Token token = tokenRepository.findById(tokenId);
+//            Token token = tokenRepository.findById(tokenId);
             LivePrice newPrice = new LivePrice(UUID.randomUUID(), tokenId, price, LocalDateTime.now());
-            return livePriceRepository.insert(newPrice);
+            livePriceRepository.insert(newPrice);
         } catch (ElementNotFoundException e) {
             // TODO: better exception handling
             System.err.println("Token not found: " + e.getMessage());
@@ -36,7 +35,7 @@ public class LivePriceService {
         }
     }
 
-    public LivePrice getLatestPrice(int tokenId) {
+    public LivePrice getLatestPrice(String tokenId) {
         try {
             return livePriceRepository.getPriceByTokenId(tokenId);
         } catch (ElementNotFoundException e) {

@@ -29,7 +29,7 @@ public class LivePriceRepository {
             while (rs.next()) {
                 LivePrice price = new LivePrice(
                         (UUID) rs.getObject("id"),
-                        rs.getInt("token_id"),
+                        rs.getString("token_id"),
                         rs.getBigDecimal("price"),
                         rs.getTimestamp("created_at").toLocalDateTime()
                 );
@@ -59,7 +59,7 @@ public class LivePriceRepository {
                 if (rs.next()) {
                     price = new LivePrice(
                             (UUID) rs.getObject("id"),
-                            rs.getInt("token_id"),
+                            rs.getString("token_id"),
                             rs.getBigDecimal("price"),
                             rs.getTimestamp("created_at").toLocalDateTime()
                     );
@@ -77,7 +77,7 @@ public class LivePriceRepository {
 
         try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
             stmt.setObject(1, price.getId());
-            stmt.setObject(2, price.getTokenId());
+            stmt.setString(2, price.getTokenId());
             stmt.setBigDecimal(3, price.getPrice());
             stmt.setTimestamp(4, Timestamp.valueOf(price.getCreatedAt()));
 
@@ -88,12 +88,12 @@ public class LivePriceRepository {
         return price;
     }
 
-    public LivePrice getPriceByTokenId(int tokenId) {
+    public LivePrice getPriceByTokenId(String tokenId) {
         String sql = "SELECT * FROM \"live-price\" WHERE token_id = ? ORDER BY created_at DESC LIMIT 1";
         LivePrice price = null;
 
         try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
-            stmt.setObject(1, tokenId);
+            stmt.setString(1, tokenId);
 
             try (ResultSet rs = stmt.executeQuery()) {
                 if (!rs.isBeforeFirst()) {
@@ -105,7 +105,7 @@ public class LivePriceRepository {
                 if (rs.next()) {
                     price = new LivePrice(
                             (UUID) rs.getObject("id"),
-                            rs.getInt("token_id"),
+                            rs.getString("token_id"),
                             rs.getBigDecimal("price"),
                             rs.getTimestamp("created_at").toLocalDateTime()
                     );

@@ -27,7 +27,7 @@ public class TokenService {
         }
     }
 
-    public Token getTokenById(int id) {
+    public Token getTokenById(String id) {
         try {
             return tokenRepository.findById(id);
         } catch (ElementNotFoundException e) {
@@ -35,7 +35,7 @@ public class TokenService {
         }
     }
 
-    public ArrayList<Integer> getTokenIds() {
+    public List<String> getTokenIds() {
         try {
             return tokenRepository.findAllIDs();
         } catch (ElementNotFoundException e) {
@@ -43,7 +43,7 @@ public class TokenService {
         }
     }
 
-    public Token updateTokenCirculatingSupply(int id, BigDecimal circulatingSupply) {
+    public Token updateTokenCirculatingSupply(String id, BigDecimal circulatingSupply) {
         try {
             Token token = tokenRepository.findById(id);
 

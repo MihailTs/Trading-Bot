@@ -11,7 +11,7 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class LivePrice extends Price{
-    public LivePrice(UUID id, int tokenId, BigDecimal price, LocalDateTime createdAt) {
+    public LivePrice(UUID id, String tokenId, BigDecimal price, LocalDateTime createdAt) {
         super(id, tokenId, price, createdAt);
     }
 }

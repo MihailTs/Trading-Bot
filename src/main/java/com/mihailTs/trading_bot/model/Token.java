@@ -11,7 +11,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 public class Token {
-    private int id;
+    private String id;
     private String name;
     private String ticker;
     public BigDecimal circulatingSupply;
