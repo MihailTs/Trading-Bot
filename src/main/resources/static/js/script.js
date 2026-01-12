@@ -1,5 +1,6 @@
 let allTokens = [];
 let allAssets = [];
+let allWallets = [];
 let assetsByTokenId = {};
 let websocketPrice = null;
 let websocketAsset = null;
@@ -9,8 +10,10 @@ let tokenCharts = {};
 document.addEventListener('DOMContentLoaded', () => {
     fetchHistoricTokenPrices();
     fetchAssets();
+    fetchWallets();
     renderTokens();
     renderAssets();
+    renderWallets();
     connectWebSocket();
 });
 
@@ -97,6 +100,35 @@ async function fetchAssets() {
     }
 }
 
+async function fetchWallets() {
+    try {
+        const response = await fetch('/wallets');
+        if (!response.ok) throw new Error('Failed to fetch wallets');
+
+        allWallets = await response.json();
+
+        if (allWallets.length > 0) {
+            const walletsDataContainer = document.getElementById('walletsDataContainer');
+            if (walletsDataContainer) {
+                walletsDataContainer.style.display = 'block';
+            }
+        } else {
+            const walletsDataContainer = document.getElementById('walletsDataContainer');
+            if (walletsDataContainer) {
+                walletsDataContainer.style.display = 'none';
+            }
+        }
+
+        renderWallets();
+
+        document.getElementById('loadingContainer').style.display = 'none';
+        document.getElementById('tokensContainer').style.display = 'grid';
+    } catch (error) {
+        console.error('Error fetching wallets:', error);
+        document.getElementById('loadingContainer').style.display = 'none';
+    }
+}
+
 function connectWebSocket() {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsPriceUrl = `${protocol}//${window.location.host}/ws/prices`;
@@ -125,7 +157,7 @@ function connectWebSocket() {
     websocketAsset.onmessage = (event) => {
         try {
             const update = JSON.parse(event.data);
-            updateAsset(update.id, update.name, update.ticker, update.quantity, update.price)
+            updateAsset(update.id, update.name, update.ticker, update.quantity, update.price);
         } catch (error) {
             console.error('Error parsing WebSocket message:', error);
         }
@@ -234,7 +266,7 @@ function formatTime(timestamp) {
     const diff = Math.floor((now - date) / 1000);
 
     if (diff < 10) return 'just now';
-    if (diff < 60) return `${Math.floor(diff)}s ago`
+    if (diff < 60) return `${Math.floor(diff)}s ago`;
     if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
     if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
     return date.toLocaleDateString();
@@ -257,7 +289,7 @@ function drawTokenChart(tokenId) {
     // labels for time of the price
     const labels = history.timestamps.map((ts, i) => {
         const date = new Date(ts);
-        return date.getHours() + ":" + (date.getMinutes() < 10? "0":"") + date.getMinutes();
+        return date.getHours() + ":" + (date.getMinutes() < 10 ? "0" : "") + date.getMinutes();
     });
 
     tokenCharts[tokenId] = new Chart(ctx, {
@@ -363,15 +395,41 @@ function renderAssets() {
 
 function updateAsset(id, name, ticker, quantity, price) {
     const assetIndex = allAssets.findIndex(a => a.id === id);
-    const update = {id, name, ticker, quantity, price};
+    const update = { id, name, ticker, quantity, price };
 
     if (assetIndex !== -1) {
         allAssets[assetIndex] = { ...allAssets[assetIndex], ...update };
-        assetsByTokenId[allAssets[assetIndex].id] = allAssets[assetIndex];
+        assetsByTokenId[allAssets[assetIndex].tokenId] = allAssets[assetIndex];
     } else {
         allAssets.push(update);
         assetsByTokenId[update.tokenId] = update;
     }
 
     renderAssets();
+}
+
+function renderWallets() {
+    const walletsList = document.getElementById('walletsList');
+
+    if (!walletsList) return;
+
+    if (allWallets.length === 0) {
+        walletsList.innerHTML = '<div class="no-wallets">No wallets yet</div>';
+        return;
+    }
+
+    walletsList.innerHTML = '';
+
+    allWallets.forEach(wallet => {
+        const walletItem = document.createElement('div');
+        walletItem.className = 'wallet-item';
+        walletItem.setAttribute('data-wallet-id', wallet.currency);
+
+        walletItem.innerHTML = `
+            <div class="wallet-currencty">${wallet.currency}</div>
+            <div class="wallet-total">Total: ${wallet.total}</div>
+        `;
+
+        walletsList.appendChild(walletItem);
+    });
 }
