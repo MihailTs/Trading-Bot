@@ -2,8 +2,9 @@ package com.mihailTs.trading_bot.service;
 
 import com.mihailTs.trading_bot.exception.ElementNotFoundException;
 import com.mihailTs.trading_bot.model.LivePrice;
+import com.mihailTs.trading_bot.model.TrainingPrice;
 import com.mihailTs.trading_bot.model.Token;
-import com.mihailTs.trading_bot.repository.LivePriceRepository;
+import com.mihailTs.trading_bot.repository.TrainingPriceRepository;
 import com.mihailTs.trading_bot.repository.TokenRepository;
 import org.springframework.stereotype.Service;
 
@@ -13,19 +14,19 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-public class LivePriceService {
+public class TrainingPriceService {
 
     private final TokenRepository tokenRepository;
-    private final LivePriceRepository livePriceRepository;
+    private final TrainingPriceRepository trainingPriceRepository;
 
-    public LivePriceService(LivePriceRepository livePriceRepository, TokenRepository tokenRepository) {
-        this.livePriceRepository = livePriceRepository;
+    public TrainingPriceService(TrainingPriceRepository trainingPriceRepository, TokenRepository tokenRepository) {
+        this.trainingPriceRepository = trainingPriceRepository;
         this.tokenRepository = tokenRepository;
     }
 
-    public LivePrice getById(UUID id) {
+    public TrainingPrice getById(UUID id) {
         try {
-            return livePriceRepository.findById(id);
+            return trainingPriceRepository.findById(id);
         } catch (ElementNotFoundException e) {
             // TODO: better exception handling
             System.err.println("Price not found: " + e.getMessage());
@@ -36,8 +37,8 @@ public class LivePriceService {
     public void saveNewPrice(BigDecimal price, String tokenId, LocalDateTime timestamp) {
         try {
             Token token = tokenRepository.findById(tokenId);
-            LivePrice newPrice = new LivePrice(UUID.randomUUID(), tokenId, price, timestamp);
-            livePriceRepository.insert(newPrice);
+            TrainingPrice newPrice = new TrainingPrice(UUID.randomUUID(), tokenId, price, timestamp);
+            trainingPriceRepository.insert(newPrice);
         } catch (ElementNotFoundException e) {
             // TODO: better exception handling
             System.err.println("Token not found: " + e.getMessage());
@@ -47,9 +48,9 @@ public class LivePriceService {
         }
     }
 
-    public LivePrice getLatestPrice(String tokenId) {
+    public TrainingPrice getLatestPrice(String tokenId) {
         try {
-            return livePriceRepository.getPriceByTokenId(tokenId);
+            return trainingPriceRepository.getPriceByTokenId(tokenId);
         } catch (ElementNotFoundException e) {
             // TODO: better exception handling
             System.err.println("Token not found: " + e.getMessage());
@@ -59,9 +60,9 @@ public class LivePriceService {
         }
     }
 
-    public List<LivePrice> getPriceHistory(String tokenId, int days) {
+    public List<TrainingPrice> getPriceHistory(String tokenId, int days) {
         try {
-            return livePriceRepository.getPriceHistoryForDays(tokenId, days);
+            return trainingPriceRepository.getPriceHistoryForDays(tokenId, days);
         } catch (ElementNotFoundException e) {
             // TODO: better exception handling
             System.err.println("Token not found: " + e.getMessage());

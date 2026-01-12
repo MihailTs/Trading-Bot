@@ -1,8 +1,8 @@
 package com.mihailTs.trading_bot.repository;
 
 import com.mihailTs.trading_bot.exception.ElementNotFoundException;
-import com.mihailTs.trading_bot.model.LivePrice;
 import com.mihailTs.trading_bot.model.LiveTransaction;
+import org.springframework.stereotype.Repository;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,8 +10,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
+@Repository
 public class LiveTransactionRepository {
 
     private Connection connection;
@@ -20,7 +22,7 @@ public class LiveTransactionRepository {
         setConnection(connection);
     }
 
-    public ArrayList<LiveTransaction> findAll() {
+    public List<LiveTransaction> findAll() {
         ArrayList<LiveTransaction> transactions = new ArrayList<>();
         String sql = "SELECT * FROM \"live-transaction\"";
 
@@ -30,7 +32,7 @@ public class LiveTransactionRepository {
             while (rs.next()) {
                 LiveTransaction transaction = new LiveTransaction(
                         (UUID) rs.getObject("id"),
-                        rs.getDouble("quantity"),
+                        rs.getBigDecimal("quantity"),
                         (UUID) rs.getObject("price_id"),
                         rs.getString("type"),
                         rs.getTimestamp("created_at").toLocalDateTime()
@@ -42,6 +44,34 @@ public class LiveTransactionRepository {
         }
 
         return transactions;
+    }
+
+    public List<LiveTransaction> findLast(int limit) {
+        ArrayList<LiveTransaction> transactions = new ArrayList<>();
+        String sql = "SELECT * FROM \"live-transaction\" ORDER BY created_at DESC LIMIT ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, limit);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    LiveTransaction transaction = new LiveTransaction(
+                            (UUID) rs.getObject("id"),
+                            rs.getBigDecimal("quantity"),
+                            (UUID) rs.getObject("price_id"),
+                            rs.getString("type"),
+                            rs.getTimestamp("created_at").toLocalDateTime()
+                    );
+                    transactions.add(transaction);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            return transactions;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public LiveTransaction findById(UUID id) {
@@ -61,7 +91,7 @@ public class LiveTransactionRepository {
                 if (rs.next()) {
                     transaction = new LiveTransaction(
                             (UUID) rs.getObject("id"),
-                            rs.getDouble("quantity"),
+                            rs.getBigDecimal("quantity"),
                             (UUID) rs.getObject("price_id"),
                             rs.getString("type"),
                             rs.getTimestamp("created_at").toLocalDateTime()
@@ -80,7 +110,7 @@ public class LiveTransactionRepository {
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setObject(1, transaction.getId());
-            stmt.setDouble(2, transaction.getQuantity());
+            stmt.setBigDecimal(2, transaction.getQuantity());
             stmt.setObject(3, transaction.getPriceId());
             stmt.setString(4, transaction.getType());
             stmt.setTimestamp(5, Timestamp.valueOf(transaction.getCreatedAt()));

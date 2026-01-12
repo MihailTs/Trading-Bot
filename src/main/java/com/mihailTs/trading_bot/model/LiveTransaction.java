@@ -4,13 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class LiveTransaction extends Transaction{
-    public LiveTransaction(UUID id, double quantity, UUID priceId, String type, LocalDateTime createdAt) {
+    public LiveTransaction(UUID id, BigDecimal quantity, UUID priceId, String type, LocalDateTime createdAt) {
         super(id, quantity, priceId, type, createdAt);
     }
 }

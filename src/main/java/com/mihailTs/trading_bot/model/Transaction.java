@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -12,7 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public abstract class Transaction {
     private UUID id;
-    private double quantity;
+    private BigDecimal quantity;
     private UUID priceId;
     private String type;
     private LocalDateTime createdAt;

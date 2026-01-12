@@ -1,29 +1,31 @@
 package com.mihailTs.trading_bot.repository;
 
+import com.mihailTs.trading_bot.config.DatabaseConfig;
 import com.mihailTs.trading_bot.exception.ElementNotFoundException;
 import com.mihailTs.trading_bot.model.TrainingAsset;
+import org.springframework.stereotype.Repository;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.UUID;
 
+@Repository
 public class TrainingAssetRepository {
 
-    private Connection connection;
-
-    public TrainingAssetRepository(Connection connection) {
-        setConnection(connection);
+    private DatabaseConfig databaseConfig;
+    public TrainingAssetRepository(DatabaseConfig databaseConfig) {
+        this.databaseConfig = databaseConfig;
     }
 
     public ArrayList<TrainingAsset> findAll() {
         ArrayList<TrainingAsset> assets = new ArrayList<>();
         String sql = "SELECT * FROM \"training-asset\"";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql);
+        try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
@@ -42,11 +44,11 @@ public class TrainingAssetRepository {
         return assets;
     }
 
-    public TrainingAsset findByTokenId(UUID tokenId) {
+    public TrainingAsset findByTokenId(String tokenId) throws ElementNotFoundException{
         String sql = "SELECT * FROM \"training-asset\" WHERE token_id = ?";
         TrainingAsset asset = null;
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
             stmt.setObject(1, tokenId);
 
             try (ResultSet rs = stmt.executeQuery()) {
@@ -65,7 +67,7 @@ public class TrainingAssetRepository {
                     );
                 }
             }
-        } catch (SQLException | ElementNotFoundException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
 
@@ -75,7 +77,7 @@ public class TrainingAssetRepository {
     public void insert(TrainingAsset asset) {
         String sql = "INSERT INTO \"training-asset\" (token_id, quantity, created_at, updated_at) VALUES (?, ?, ?, ?)";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
             stmt.setString(1, asset.getTokenId());
             stmt.setBigDecimal(2, asset.getQuantity());
             stmt.setTimestamp(3, Timestamp.valueOf(asset.getCreatedAt()));
@@ -90,16 +92,14 @@ public class TrainingAssetRepository {
     public void update(String tokenId, double quantity, Timestamp updatedAt) {
         String sql = "UPDATE \"training-asset\" SET quantity = ?, updated_at = ? WHERE token_id = ?";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
             stmt.setDouble(1, quantity);
             stmt.setTimestamp(2, updatedAt);
-            stmt.setString(3, tokenId);
+            stmt.setObject(3, tokenId);
 
             int rowsUpdated = stmt.executeUpdate();
             if (rowsUpdated == 0) {
-                throw new ElementNotFoundException(
-                        String.format("No asset with token_id %s was found to update.", tokenId)
-                );
+                throw new ElementNotFoundException(String.format("No asset with token_id %s was found to update.", tokenId));
             }
         } catch (SQLException | ElementNotFoundException e) {
             e.printStackTrace();
@@ -110,28 +110,18 @@ public class TrainingAssetRepository {
         String sql = "DELETE FROM \"training-asset\" WHERE token_id = ?";
         int rowsDeleted = 0;
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, tokenId);
+        try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
+            stmt.setObject(1, tokenId);
 
             rowsDeleted = stmt.executeUpdate();
             if (rowsDeleted == 0) {
-                throw new ElementNotFoundException(
-                        String.format("No token with id %s was found to delete.", tokenId)
-                );
+                throw new ElementNotFoundException(String.format("No token with id %s was found to delete.", tokenId));
             }
         } catch (SQLException | ElementNotFoundException e) {
             e.printStackTrace();
         }
 
         return rowsDeleted;
-    }
-
-    public void setConnection(Connection connection) {
-        this.connection = connection;
-    }
-
-    public Connection getConnection() {
-        return connection;
     }
 
 }
