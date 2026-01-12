@@ -79,3 +79,13 @@ VALUES ('bitcoin', 'Bitcoin', 'BTC', 19974018, CURRENT_TIMESTAMP, CURRENT_TIMEST
 
 ALTER TABLE "token" ALTER COLUMN "circulating_supply" SET NOT NULL;
 ALTER TABLE "token" ADD CONSTRAINT minimum_constraint CHECK ("circulating_supply" >= 0);
+
+CREATE TABLE wallet(
+    "currency" varchar(8) PRIMARY KEY,
+    "total" decimal NOT NULL,
+    "created_at" timestamp NOT NULL,
+    "updated_at" timestamp NOT NULL
+);
+
+INSERT INTO "wallet" ("currency", "total", "created_at", "updated_at")
+VALUES ('USD', 1000, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);

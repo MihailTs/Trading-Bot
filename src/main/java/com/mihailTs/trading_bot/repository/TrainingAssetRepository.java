@@ -29,7 +29,7 @@ public class TrainingAssetRepository {
             while (rs.next()) {
                 TrainingAsset asset = new TrainingAsset(
                         rs.getString("token_id"),
-                        rs.getDouble("quantity"),
+                        rs.getBigDecimal("quantity"),
                         rs.getTimestamp("created_at").toLocalDateTime(),
                         rs.getTimestamp("updated_at").toLocalDateTime()
                 );
@@ -59,7 +59,7 @@ public class TrainingAssetRepository {
                 if (rs.next()) {
                     asset = new TrainingAsset(
                             rs.getString("token_id"),
-                            rs.getDouble("quantity"),
+                            rs.getBigDecimal("quantity"),
                             rs.getTimestamp("created_at").toLocalDateTime(),
                             rs.getTimestamp("updated_at").toLocalDateTime()
                     );
@@ -77,7 +77,7 @@ public class TrainingAssetRepository {
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, asset.getTokenId());
-            stmt.setDouble(2, asset.getQuantity());
+            stmt.setBigDecimal(2, asset.getQuantity());
             stmt.setTimestamp(3, Timestamp.valueOf(asset.getCreatedAt()));
             stmt.setTimestamp(4, Timestamp.valueOf(asset.getUpdatedAt()));
 

@@ -100,7 +100,7 @@ public class TokenRepository {
             stmt.setBigDecimal(3, token.getCirculatingSupply());
             stmt.setString(4, token.getTicker());
             stmt.setTimestamp(5, Timestamp.valueOf(token.getCreatedAt()));
-            stmt.setTimestamp(6, Timestamp.valueOf(token.getCreatedAt()));
+            stmt.setTimestamp(6, Timestamp.valueOf(token.getUpdatedAt()));
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

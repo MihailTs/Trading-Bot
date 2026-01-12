@@ -1,12 +1,16 @@
 let allTokens = [];
-let websocket = null;
+let allAssets = [];
+let assetsByTokenId = {};
+let websocketPrice = null;
+let websocketAsset = null;
 let priceHistory = {};
 let tokenCharts = {};
 
 document.addEventListener('DOMContentLoaded', () => {
     fetchHistoricTokenPrices();
+    fetchAssets();
     renderTokens();
-    console.log(priceHistory)
+    renderAssets();
     connectWebSocket();
 });
 
@@ -57,13 +61,50 @@ async function fetchHistoricTokenPrices() {
     }
 }
 
+async function fetchAssets() {
+    try {
+        const response = await fetch('/assets');
+        if (!response.ok) throw new Error('Failed to fetch assets');
+
+        allAssets = [];
+        assetsByTokenId = {};
+
+        allAssets = await response.json();
+
+        allAssets.forEach(asset => {
+            assetsByTokenId[asset.tokenId] = asset;
+        });
+
+        if (allAssets.length > 0) {
+            const accountDataContainer = document.getElementById('accountDataContainer');
+            if (accountDataContainer) {
+                accountDataContainer.style.display = 'block';
+            }
+        } else {
+            const accountDataContainer = document.getElementById('accountDataContainer');
+            if (accountDataContainer) {
+                accountDataContainer.style.display = 'none';
+            }
+        }
+
+        renderAssets();
+
+        document.getElementById('loadingContainer').style.display = 'none';
+        document.getElementById('tokensContainer').style.display = 'grid';
+    } catch (error) {
+        console.error('Error fetching assets:', error);
+        document.getElementById('loadingContainer').style.display = 'none';
+    }
+}
+
 function connectWebSocket() {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/ws/prices`;
+    const wsPriceUrl = `${protocol}//${window.location.host}/ws/prices`;
+    const wsAssetUrl = `${protocol}//${window.location.host}/ws/assets`;
 
-    websocket = new WebSocket(wsUrl);
+    websocketPrice = new WebSocket(wsPriceUrl);
 
-    websocket.onmessage = (event) => {
+    websocketPrice.onmessage = (event) => {
         try {
             const update = JSON.parse(event.data);
             updateTokenPrice(update.id, update.currentPrice, update.lastUpdated);
@@ -71,13 +112,29 @@ function connectWebSocket() {
             console.error('Error parsing WebSocket message:', error);
         }
     };
-
-    websocket.onerror = (error) => {
+    websocketPrice.onerror = (error) => {
         console.error('WebSocket error:', error);
     };
-
-    websocket.onclose = () => {
+    websocketPrice.onclose = () => {
         // try to reconnect after 5 seconds
+        setTimeout(connectWebSocket, 5000);
+    };
+
+    websocketAsset = new WebSocket(wsAssetUrl);
+
+    websocketAsset.onmessage = (event) => {
+        try {
+            const update = JSON.parse(event.data);
+            updateAsset(update.id, update.name, update.ticker, update.quantity, update.price)
+        } catch (error) {
+            console.error('Error parsing WebSocket message:', error);
+        }
+    };
+
+    websocketAsset.onerror = (error) => {
+        console.error('WebSocket error:', error);
+    };
+    websocketAsset.onclose = () => {
         setTimeout(connectWebSocket, 5000);
     };
 }
@@ -272,4 +329,49 @@ function drawTokenChart(tokenId) {
             }
         }
     });
+}
+
+function renderAssets() {
+    const assetsList = document.getElementById('assetsList');
+
+    if (!assetsList) return;
+
+    if (allAssets.length === 0) {
+        assetsList.innerHTML = '<div class="no-assets">No assets yet</div>';
+        return;
+    }
+
+    assetsList.innerHTML = '';
+
+    allAssets.forEach(asset => {
+        const assetItem = document.createElement('div');
+        assetItem.className = 'asset-item';
+        assetItem.setAttribute('data-asset-id', asset.id);
+
+        const totalValue = (asset.quantity * asset.price).toFixed(2);
+
+        assetItem.innerHTML = `
+            <div class="asset-ticker">${asset.ticker}</div>
+            <div class="asset-name">${asset.name}</div>
+            <div class="asset-quantity">Quantity: ${asset.quantity}</div>
+            <div class="asset-total">Total: $${totalValue}</div>
+        `;
+
+        assetsList.appendChild(assetItem);
+    });
+}
+
+function updateAsset(id, name, ticker, quantity, price) {
+    const assetIndex = allAssets.findIndex(a => a.id === id);
+    const update = {id, name, ticker, quantity, price};
+
+    if (assetIndex !== -1) {
+        allAssets[assetIndex] = { ...allAssets[assetIndex], ...update };
+        assetsByTokenId[allAssets[assetIndex].id] = allAssets[assetIndex];
+    } else {
+        allAssets.push(update);
+        assetsByTokenId[update.tokenId] = update;
+    }
+
+    renderAssets();
 }

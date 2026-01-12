@@ -1,6 +1,7 @@
 package com.mihailTs.trading_bot.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.mihailTs.trading_bot.websocket.AssetWebSocketHandler;
 import com.mihailTs.trading_bot.websocket.TokenPriceWebSocketHandler;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,21 +32,27 @@ public class BotService {
     private String tokenPricesURL;
     @Value("${token.price.precision}")
     private String pricePrecision;
-    private TokenService tokenService;
-    private LivePriceService livePriceService;
+    private final TokenService tokenService;
+    private final LivePriceService livePriceService;
     private LiveAssetService liveAssetService;
-    private TokenPriceWebSocketHandler tokenPriceWebSocketHandler;
-    private ObjectMapper objectMapper;
+    private WalletService walletService;
+    private final TokenPriceWebSocketHandler tokenPriceWebSocketHandler;
+    private final AssetWebSocketHandler assetWebSocketHandler;
+    private final ObjectMapper objectMapper;
 
     public BotService(TokenService tokenService,
                       LivePriceService livePriceService,
                       LiveAssetService liveAssetService,
+                      WalletService walletService,
                       TokenPriceWebSocketHandler tokenPriceWebSocketHandler,
+                      AssetWebSocketHandler assetWebSocketHandler,
                       ObjectMapper objectMapper) throws IOException {
         this.tokenService = tokenService;
         this.livePriceService = livePriceService;
         this.liveAssetService = liveAssetService;
+        this.walletService = walletService;
         this.tokenPriceWebSocketHandler = tokenPriceWebSocketHandler;
+        this.assetWebSocketHandler = assetWebSocketHandler;
         this.objectMapper = objectMapper;
 
     }
@@ -71,7 +78,7 @@ public class BotService {
     }
 
     // API data changes every ~1 minute
-    @Scheduled(fixedRate = 30000)
+    @Scheduled(fixedRate = 20000)
     public void fetchNewestData() throws IOException, InterruptedException {
         List<String> tokenIDs = tokenService.getTokenIds();
 
@@ -84,6 +91,9 @@ public class BotService {
 
         for(String id : tokenIDs) {
             tokenPriceWebSocketHandler.broadcastToken(id);
+            if(liveAssetService.getAssetByTokenId(id) != null) {
+                assetWebSocketHandler.broadcastAsset(id);
+            }
         }
 
     }
@@ -185,12 +195,6 @@ public class BotService {
                 livePriceService.saveNewPrice(price, tokenId, timestamp);
             }
         }
-    }
-
-
-
-    private static <T> Iterable<T> iterable(Iterator<T> it) {
-        return () -> it;
     }
 
 }

@@ -110,3 +110,72 @@ header h1 {
     position: relative;
     height: 160px;
 }
+
+.account-details {
+    background: white;
+    border-radius: 8px;
+    padding: 16px;
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+}
+
+.account-details h2 {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 12px;
+}
+
+.assets-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.asset-item {
+    padding: 12px;
+    background: #f9f9f9;
+    border-radius: 6px;
+    border-left: 3px solid #a0a5c3;
+    font-size: 13px;
+}
+
+.asset-ticker {
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.asset-name {
+    color: #999;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.asset-quantity {
+    color: #666;
+    margin-bottom: 4px;
+}
+
+.asset-price {
+    color: #333;
+    font-weight: 600;
+}
+
+.no-assets {
+    text-align: center;
+    color: #999;
+    padding: 20px 0;
+    font-size: 13px;
+}
+
+.asset-total {
+    color: #0079ca;
+    margin-top: 6px;
+    font-size: 14px;
+}
