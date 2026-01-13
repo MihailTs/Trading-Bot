@@ -36,12 +36,12 @@ async function fetchHistoricTokenPrices() {
         }
 
         renderTokens();
-        console.log(priceHistory);
-        document.getElementById('loadingContainer').style.display = 'none';
+
+        document.getElementById('loadingContainerLeft').style.display = 'none';
         document.getElementById('tokensContainer').style.display = 'grid';
     } catch (error) {
         console.error('Error fetching tokens:', error);
-        document.getElementById('loadingContainer').style.display = 'none';
+        document.getElementById('loadingContainerLeft').style.display = 'none';
     }
 }
 

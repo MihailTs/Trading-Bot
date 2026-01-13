@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -58,4 +59,15 @@ public class LiveTransactionService {
         }
     }
 
+    public List<LiveTransaction> getPagedTransactions(int page, int pageSize) {
+        try {
+            return liveTransactionRepository.findPageByDate(page, pageSize);
+        } catch (ElementNotFoundException e) {
+            // TODO: better exception handling
+            System.err.println("Token not found: " + e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to save new price", e);
+        }
+    }
 }

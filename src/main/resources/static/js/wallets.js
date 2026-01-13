@@ -19,11 +19,11 @@ async function fetchWallets() {
 
         renderWallets();
 
-        document.getElementById('loadingContainer').style.display = 'none';
-        document.getElementById('tokensContainer').style.display = 'grid';
+        document.getElementById('loadingContainerRight').style.display = 'none';
+        document.getElementById('walletsDataContainer').style.display = 'grid';
     } catch (error) {
         console.error('Error fetching wallets:', error);
-        document.getElementById('loadingContainer').style.display = 'none';
+        document.getElementById('loadingContainerRight').style.display = 'none';
     }
 }
 
@@ -55,8 +55,6 @@ function renderWallets() {
 
 function updateTotalValue() {
     totalValue = 0;
-    console.log(allAssets);
-    console.log(allWallets);
     allWallets.forEach(wallet => totalValue += wallet.total);
     allAssets.forEach(asset => totalValue += asset.quantity * asset.price);
     totalValue = totalValue.toFixed(2)

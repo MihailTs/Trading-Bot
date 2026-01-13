@@ -129,4 +129,33 @@ public class LiveTransactionRepository {
         return connection;
     }
 
+    public List<LiveTransaction> findPageByDate(int page, int pageSize) {
+        ArrayList<LiveTransaction> transactions = new ArrayList<>();
+        String sql = "SELECT * FROM \"live-transaction\" ORDER BY created_at DESC OFFSET ? * ? LIMIT ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, page);
+            stmt.setInt(2, pageSize);
+            stmt.setInt(3, pageSize);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    LiveTransaction transaction = new LiveTransaction(
+                            (UUID) rs.getObject("id"),
+                            rs.getBigDecimal("quantity"),
+                            (UUID) rs.getObject("price_id"),
+                            rs.getString("type"),
+                            rs.getTimestamp("created_at").toLocalDateTime()
+                    );
+                    transactions.add(transaction);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            return transactions;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

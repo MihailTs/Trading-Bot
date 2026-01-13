@@ -1,16 +1,19 @@
 package com.mihailTs.trading_bot.controllers;
 
 import com.mihailTs.trading_bot.dto.TokenWithPriceDto;
+import com.mihailTs.trading_bot.dto.TransactionDto;
 import com.mihailTs.trading_bot.model.LivePrice;
+import com.mihailTs.trading_bot.model.Token;
 import com.mihailTs.trading_bot.service.LivePriceService;
+import com.mihailTs.trading_bot.service.LiveTransactionService;
+import com.mihailTs.trading_bot.service.TokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,24 +22,29 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TransactionsController {
 
-//    private  tokenService;
-    private final LivePriceService priceService;
+    private final TokenService tokenService;
+    private final LiveTransactionService liveTransactionService;
+    private final LivePriceService livePriceService;
 
-//    @GetMapping
-//    public ResponseEntity<List<TokenWithPriceDto>> getAllTokens() {
-//        List<TokenWithPriceDto> tokens = tokenService.getAll().stream()
-//                .map(token -> {
-//                    LivePrice latestPrice = priceService.getLatestPrice(token.getId());
-//                    return new TokenWithPriceDto(
-//                            token.getId(),
-//                            token.getName(),
-//                            token.getTicker(),
-//                            latestPrice != null ? latestPrice.getPrice() : BigDecimal.ZERO,
-//                            latestPrice != null ? latestPrice.getCreatedAt() : LocalDateTime.MIN
-//                    );
-//                })
-//                .collect(Collectors.toList());
-//        return ResponseEntity.ok(tokens);
-//    }
+    @GetMapping()
+    public ResponseEntity<List<TransactionDto>> getAllTokens(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "30") int pageSize) {
+        List<TransactionDto> transactions = liveTransactionService.getPagedTransactions(page, pageSize).stream()
+                .map(transaction -> {
+                    LivePrice latestPrice = livePriceService.getById(transaction.getPriceId());
+                    Token transactedToken = tokenService.getTokenById(latestPrice.getTokenId());
+                    return new TransactionDto(
+                            transaction.getId(),
+                            transactedToken.getName(),
+                            transactedToken.getTicker(),
+                            transaction.getType(),
+                            transaction.getQuantity(),
+                            transaction.getCreatedAt()
+                    );
+                })
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(transactions);
+    }
 
 }

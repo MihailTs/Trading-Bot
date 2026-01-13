@@ -13,12 +13,12 @@ async function fetchAssets() {
         });
 
         if (allAssets.length > 0) {
-            const accountDataContainer = document.getElementById('accountDataContainer');
+            const accountDataContainer = document.getElementById('assetDataContainer');
             if (accountDataContainer) {
                 accountDataContainer.style.display = 'block';
             }
         } else {
-            const accountDataContainer = document.getElementById('accountDataContainer');
+            const accountDataContainer = document.getElementById('assetDataContainer');
             if (accountDataContainer) {
                 accountDataContainer.style.display = 'none';
             }
@@ -26,11 +26,9 @@ async function fetchAssets() {
 
         renderAssets();
 
-        document.getElementById('loadingContainer').style.display = 'none';
-        document.getElementById('tokensContainer').style.display = 'grid';
+        document.getElementById('assetDataContainer').style.display = 'grid';
     } catch (error) {
         console.error('Error fetching assets:', error);
-        document.getElementById('loadingContainer').style.display = 'none';
     }
 }
 

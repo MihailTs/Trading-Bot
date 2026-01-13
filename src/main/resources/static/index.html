@@ -14,17 +14,18 @@
     </header>
 
     <div class="left-column">
-        <div id="loadingContainer" class="loading">Loading tokens...</div>
+        <div id="loadingContainerLeft" class="loading">Loading tokens...</div>
         <div id="tokensContainer" class="tokens-grid" style="display: none;"></div>
         <div id="noResultsContainer" class="no-results" style="display: none;">No tokens found.</div>
     </div>
 
     <div class="right-column">
+        <div id="loadingContainerRight" class="loading">Loading account...</div>
         <div id="walletsDataContainer" class="wallet-details" style="display: none; margin-bottom: 10px">
             <h2>Wallets</h2>
             <div id="walletsList" class="wallets-list"></div>
         </div>
-        <div id="accountDataContainer" class="account-details" style="display: none; margin-bottom: 10px">
+        <div id="assetDataContainer" class="account-details" style="display: none; margin-bottom: 10px">
             <h2>Current Assets</h2>
             <div id="assetsList" class="assets-list"></div>
         </div>
@@ -34,11 +35,16 @@
                 <label id="totalValue"></label>
             </div>
         </div>
+        <div id="transactionsDataContainer" class="transaction-details" style="display: none; margin-bottom: 10px">
+            <h2>Transactions</h2>
+            <div id="transactionsList" class="transactions-list"></div>
+        </div>
     </div>
 </div>
 <script src="js/script.js"></script>
 <script src="js/assets.js"></script>
 <script src="js/tokens.js"></script>
 <script src="js/wallets.js"></script>
+<script src="js/transactions.js"></script>
 </body>
 </html>
