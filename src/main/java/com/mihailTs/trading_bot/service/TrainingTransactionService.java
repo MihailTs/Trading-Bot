@@ -1,6 +1,7 @@
 package com.mihailTs.trading_bot.service;
 
 import com.mihailTs.trading_bot.exception.ElementNotFoundException;
+import com.mihailTs.trading_bot.exception.IllegalOperationException;
 import com.mihailTs.trading_bot.model.LiveTransaction;
 import com.mihailTs.trading_bot.model.TrainingPrice;
 import com.mihailTs.trading_bot.model.TrainingTransaction;
@@ -36,7 +37,11 @@ public class TrainingTransactionService {
                                    LocalDateTime createdAt) {
         try {
             Token token = tokenService.getTokenById(tokenId);
-            TrainingPrice price = trainingPriceService.getById(priceId);
+            TrainingPrice save_price = trainingPriceService.getById(priceId);
+            TrainingPrice latest_price = trainingPriceService.getLatestPrice(tokenId);
+            if(save_price.getId() != latest_price.getId()) {
+                throw new IllegalOperationException("A transaction cannot be registered with earlier price");
+            }
             trainingTransactionRepository.insert(new TrainingTransaction(id, quantity, priceId, type, createdAt));
         } catch (ElementNotFoundException e) {
             // TODO: better exception handling
@@ -59,4 +64,15 @@ public class TrainingTransactionService {
         }
     }
 
+    public List<TrainingTransaction> getPagedTransactions(int page, int pageSize) {
+        try {
+            return trainingTransactionRepository.findPageByDate(page, pageSize);
+        } catch (ElementNotFoundException e) {
+            // TODO: better exception handling
+            System.err.println("Token not found: " + e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to save new price", e);
+        }
+    }
 }

@@ -35,26 +35,38 @@ public class BotService {
     private final TokenService tokenService;
     private final LivePriceService livePriceService;
     private LiveAssetService liveAssetService;
+    private final TrainingPriceService trainingPriceService;
+    private TrainingAssetService trainingAssetService;
+    private TrainingTransactionService trainingTransactionService;
+    private LiveTransactionService liveTransactionService;
     private WalletService walletService;
     private final TokenPriceWebSocketHandler tokenPriceWebSocketHandler;
     private final AssetWebSocketHandler assetWebSocketHandler;
     private final ObjectMapper objectMapper;
+    private final ModeManager modeManager;
 
     public BotService(TokenService tokenService,
                       LivePriceService livePriceService,
                       LiveAssetService liveAssetService,
                       WalletService walletService,
+                      TrainingTransactionService trainingTransactionService,
+                      LiveTransactionService liveTransactionService,
                       TokenPriceWebSocketHandler tokenPriceWebSocketHandler,
                       AssetWebSocketHandler assetWebSocketHandler,
-                      ObjectMapper objectMapper) throws IOException {
+                      TrainingPriceService trainingPriceService,
+                      ObjectMapper objectMapper,
+                      ModeManager modeManager) throws IOException {
         this.tokenService = tokenService;
         this.livePriceService = livePriceService;
         this.liveAssetService = liveAssetService;
         this.walletService = walletService;
+        this.trainingPriceService = trainingPriceService;
         this.tokenPriceWebSocketHandler = tokenPriceWebSocketHandler;
         this.assetWebSocketHandler = assetWebSocketHandler;
+        this.liveTransactionService = liveTransactionService;
+        this.trainingTransactionService = trainingTransactionService;
         this.objectMapper = objectMapper;
-
+        this.modeManager = modeManager;
     }
 
     // run once every 24 hours

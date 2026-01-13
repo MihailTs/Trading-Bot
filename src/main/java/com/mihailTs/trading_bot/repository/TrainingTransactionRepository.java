@@ -1,7 +1,7 @@
 package com.mihailTs.trading_bot.repository;
 
 import com.mihailTs.trading_bot.exception.ElementNotFoundException;
-import com.mihailTs.trading_bot.model.LiveTransaction;
+import com.mihailTs.trading_bot.model.TrainingTransaction;
 import com.mihailTs.trading_bot.model.TrainingTransaction;
 import com.mihailTs.trading_bot.model.Transaction;
 import org.springframework.stereotype.Repository;
@@ -119,6 +119,36 @@ public class TrainingTransactionRepository {
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    public List<TrainingTransaction> findPageByDate(int page, int pageSize) {
+        ArrayList<TrainingTransaction> transactions = new ArrayList<>();
+        String sql = "SELECT * FROM \"training-transaction\" ORDER BY created_at DESC OFFSET ? * ? LIMIT ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, page);
+            stmt.setInt(2, pageSize);
+            stmt.setInt(3, pageSize);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    TrainingTransaction transaction = new TrainingTransaction(
+                            (UUID) rs.getObject("id"),
+                            rs.getBigDecimal("quantity"),
+                            (UUID) rs.getObject("price_id"),
+                            rs.getString("type"),
+                            rs.getTimestamp("created_at").toLocalDateTime()
+                    );
+                    transactions.add(transaction);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            return transactions;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 

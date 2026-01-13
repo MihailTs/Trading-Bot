@@ -1,10 +1,13 @@
 package com.mihailTs.trading_bot.service;
 
 import com.mihailTs.trading_bot.exception.ElementNotFoundException;
-import com.mihailTs.trading_bot.model.LivePrice;
-import com.mihailTs.trading_bot.model.LiveTransaction;
+import com.mihailTs.trading_bot.exception.IllegalOperationException;
+import com.mihailTs.trading_bot.model.TrainingPrice;
+import com.mihailTs.trading_bot.model.TrainingTransaction;
 import com.mihailTs.trading_bot.model.Token;
-import com.mihailTs.trading_bot.repository.LiveTransactionRepository;
+import com.mihailTs.trading_bot.model.TrainingPrice;
+import com.mihailTs.trading_bot.model.TrainingTransaction;
+import com.mihailTs.trading_bot.repository.TrainingTransactionRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -17,15 +20,15 @@ import java.util.UUID;
 public class LiveTransactionService {
 
     private final TokenService tokenService;
-    private final LiveTransactionRepository liveTransactionRepository;
-    public final LivePriceService livePriceService;
+    private final TrainingTransactionRepository trainingTransactionRepository;
+    public final TrainingPriceService trainingPriceService;
 
-    public LiveTransactionService(LiveTransactionRepository liveTransactionRepository,
+    public LiveTransactionService(TrainingTransactionRepository trainingTransactionRepository,
                                   TokenService tokenService,
-                                  LivePriceService livePriceService) {
+                                  TrainingPriceService trainingPriceService) {
         this.tokenService = tokenService;
-        this.liveTransactionRepository = liveTransactionRepository;
-        this.livePriceService = livePriceService;
+        this.trainingTransactionRepository = trainingTransactionRepository;
+        this.trainingPriceService = trainingPriceService;
     }
 
     public void saveNewTransaction(UUID id,
@@ -36,8 +39,12 @@ public class LiveTransactionService {
                                    LocalDateTime createdAt) {
         try {
             Token token = tokenService.getTokenById(tokenId);
-            LivePrice price = livePriceService.getById(priceId);
-            liveTransactionRepository.insert(new LiveTransaction(id, quantity, priceId, type, createdAt));
+            TrainingPrice save_price = trainingPriceService.getById(priceId);
+            TrainingPrice latest_price = trainingPriceService.getLatestPrice(tokenId);
+            if(save_price.getId() != latest_price.getId()) {
+                throw new IllegalOperationException("A transaction cannot be registered with earlier price");
+            }
+            trainingTransactionRepository.insert(new TrainingTransaction(id, quantity, priceId, type, createdAt));
         } catch (ElementNotFoundException e) {
             // TODO: better exception handling
             System.err.println("Token not found: " + e.getMessage());
@@ -47,9 +54,9 @@ public class LiveTransactionService {
         }
     }
 
-    public List<LiveTransaction> getLastTransactions(int limit) {
+    public List<TrainingTransaction> getLastTransactions(int limit) {
         try {
-            return liveTransactionRepository.findLast(limit);
+            return trainingTransactionRepository.findLast(limit);
         } catch (ElementNotFoundException e) {
             // TODO: better exception handling
             System.err.println("Token not found: " + e.getMessage());
@@ -59,9 +66,9 @@ public class LiveTransactionService {
         }
     }
 
-    public List<LiveTransaction> getPagedTransactions(int page, int pageSize) {
+    public List<TrainingTransaction> getPagedTransactions(int page, int pageSize) {
         try {
-            return liveTransactionRepository.findPageByDate(page, pageSize);
+            return trainingTransactionRepository.findPageByDate(page, pageSize);
         } catch (ElementNotFoundException e) {
             // TODO: better exception handling
             System.err.println("Token not found: " + e.getMessage());
