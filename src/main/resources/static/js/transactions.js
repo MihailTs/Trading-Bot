@@ -2,7 +2,7 @@ async function fetchTransactions() {
     try {
         // fetching only the first page of transactions
         // TODO: add pagination
-        const response = await fetch('/transactions?page=0&pageSize=50');
+        const response = await fetch(`/transactions/${modes[currentMode]}?page=0&pageSize=50`);
         if (!response.ok) throw new Error('Failed to fetch transactions');
 
         latestTransactions = await response.json();

@@ -1,6 +1,6 @@
 async function fetchAssets() {
     try {
-        const response = await fetch('/assets');
+        const response = await fetch(`/assets/${modes[currentMode]}?`);
         if (!response.ok) throw new Error('Failed to fetch assets');
 
         allAssets = [];

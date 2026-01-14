@@ -2,20 +2,21 @@ package com.mihailTs.trading_bot.service;
 
 import com.mihailTs.trading_bot.exception.ElementNotFoundException;
 import com.mihailTs.trading_bot.model.Wallet;
-import com.mihailTs.trading_bot.repository.WalletRepository;
+import com.mihailTs.trading_bot.repository.LiveWalletRepository;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class WalletService {
+public class LiveWalletService {
 
-    private final WalletRepository walletRepository;
+    private final LiveWalletRepository walletRepository;
 
-    public WalletService(WalletRepository walletRepository) {
+    public LiveWalletService(LiveWalletRepository walletRepository) {
         this.walletRepository = walletRepository;
     }
 
@@ -35,7 +36,7 @@ public class WalletService {
         }
     }
 
-    public void saveWallet(String currency, double total, LocalDateTime created_at) {
+    public void saveWallet(String currency, BigDecimal total, LocalDateTime created_at) {
         try {
             walletRepository.insert(new Wallet(currency, total, created_at, created_at));
         } catch (SQLException e) {
@@ -43,7 +44,7 @@ public class WalletService {
         }
     }
 
-    public void addMoneyToWallet(String currency, double amount) {
+    public void addMoneyToWallet(String currency, BigDecimal amount) {
         try {
             Wallet wallet = walletRepository.findByCurrency(currency);
             walletRepository.updateWallet(wallet, amount);

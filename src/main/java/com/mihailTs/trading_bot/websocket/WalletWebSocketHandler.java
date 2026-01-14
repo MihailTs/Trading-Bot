@@ -1,19 +1,12 @@
 package com.mihailTs.trading_bot.websocket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mihailTs.trading_bot.dto.TokenWithPriceDto;
 import com.mihailTs.trading_bot.dto.WalletDto;
-import com.mihailTs.trading_bot.model.LivePrice;
-import com.mihailTs.trading_bot.model.Token;
 import com.mihailTs.trading_bot.model.Wallet;
-import com.mihailTs.trading_bot.service.LiveAssetService;
-import com.mihailTs.trading_bot.service.LivePriceService;
-import com.mihailTs.trading_bot.service.TokenService;
-import com.mihailTs.trading_bot.service.WalletService;
+import com.mihailTs.trading_bot.service.LiveWalletService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
@@ -23,11 +16,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 @Component
 public class WalletWebSocketHandler extends TextWebSocketHandler {
-    private WalletService walletService;
+    private LiveWalletService walletService;
     private final ObjectMapper objectMapper;
     private final List<WebSocketSession> sessions = new CopyOnWriteArrayList<>();
 
-    public WalletWebSocketHandler(WalletService walletService,
+    public WalletWebSocketHandler(LiveWalletService walletService,
                                   ObjectMapper objectMapper) {
         this.walletService = walletService;
         this.objectMapper = objectMapper;

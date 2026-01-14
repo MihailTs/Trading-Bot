@@ -9,6 +9,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -140,6 +142,68 @@ public class TrainingPriceRepository {
                 }
             }
         } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return prices;
+    }
+
+    public List<TrainingPrice> getPriceHistoryForDate(String tokenId, LocalDate date) {
+        String sql = "SELECT * FROM \"training-price\" " +
+                "WHERE token_id = ? " +
+                "AND EXTRACT(YEAR from created_at) = ? " +
+                "AND EXTRACT(MONTH from created_at) = ? " +
+                "AND EXTRACT(DAY from created_at) = ? " +
+                "ORDER BY created_at DESC";
+        List<TrainingPrice> prices = new ArrayList<>();
+
+        try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
+            stmt.setString(1, tokenId);
+            stmt.setInt(2, date.getYear());
+            stmt.setInt(3, date.getMonthValue());
+            stmt.setInt(4, date.getDayOfMonth());
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    TrainingPrice price = new TrainingPrice(
+                            (UUID) rs.getObject("id"),
+                            rs.getString("token_id"),
+                            rs.getBigDecimal("price"),
+                            rs.getTimestamp("created_at").toLocalDateTime()
+                    );
+                    prices.add(price);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return prices;
+    }
+
+    public List<TrainingPrice> findByTimestampBetween(LocalDateTime start, LocalDateTime end) {
+        String sql = "SELECT * FROM \"training-price\" " +
+                "WHERE created_at >= ? AND created_at < ? " +
+                "ORDER BY created_at ASC";
+        List<TrainingPrice> prices = new ArrayList<>();
+
+        try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
+            stmt.setTimestamp(1, Timestamp.valueOf(start));
+            stmt.setTimestamp(2, Timestamp.valueOf(end));
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    TrainingPrice price = new TrainingPrice(
+                            (UUID) rs.getObject("id"),
+                            rs.getString("token_id"),
+                            rs.getBigDecimal("price"),
+                            rs.getTimestamp("created_at").toLocalDateTime()
+                    );
+                    prices.add(price);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error fetching prices between " + start + " and " + end + ": " + e.getMessage());
             e.printStackTrace();
         }
 

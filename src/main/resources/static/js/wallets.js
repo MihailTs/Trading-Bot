@@ -1,6 +1,6 @@
 async function fetchWallets() {
     try {
-        const response = await fetch('/wallets');
+        const response = await fetch(`/wallets/${modes[currentMode]}?`);
         if (!response.ok) throw new Error('Failed to fetch wallets');
 
         allWallets = await response.json();

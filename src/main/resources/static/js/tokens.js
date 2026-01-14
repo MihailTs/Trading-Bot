@@ -9,7 +9,7 @@ async function fetchHistoricTokenPrices() {
         // fetch historic prices for each token
         for (const token of allTokens) {
             try {
-                const historyResponse = await fetch(`/historic/${token.id}?days=1`);
+                const historyResponse = await fetch(`/historic/${modes[currentMode]}/${token.id}?days=1`);
                 if (historyResponse.ok) {
                     const prices = await historyResponse.json();
                     priceHistory[token.id] = {

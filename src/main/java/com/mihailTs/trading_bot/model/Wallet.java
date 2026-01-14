@@ -10,8 +10,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Wallet {
     private String currency;
-    private double total;
+    private BigDecimal total;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
 }

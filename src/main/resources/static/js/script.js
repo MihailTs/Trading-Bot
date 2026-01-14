@@ -11,6 +11,11 @@ let websocketTransaction = null;
 let priceHistory = {};
 let tokenCharts = {};
 let totalValue = null;
+let currentMode = 0;
+let modes = {
+    0: "live",
+    1: "training"
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
     await fetchHistoricTokenPrices();

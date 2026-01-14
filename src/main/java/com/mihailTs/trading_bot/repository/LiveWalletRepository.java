@@ -4,6 +4,7 @@ import com.mihailTs.trading_bot.config.DatabaseConfig;
 import com.mihailTs.trading_bot.model.Wallet;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,17 +14,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Repository
-public class WalletRepository {
+public class LiveWalletRepository {
 
     private DatabaseConfig databaseConfig;
 
-    public WalletRepository(DatabaseConfig databaseConfig) {
+    public LiveWalletRepository(DatabaseConfig databaseConfig) {
         this.databaseConfig = databaseConfig;
     }
 
     public List<Wallet> findAll() {
         ArrayList<Wallet> wallets = new ArrayList<>();
-        String sql = "SELECT * FROM wallet";
+        String sql = "SELECT * FROM \"live-wallet\"";
 
         try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -31,7 +32,7 @@ public class WalletRepository {
             while (rs.next()) {
                 Wallet wallet = new Wallet(
                         rs.getString("currency"),
-                        rs.getDouble("total"),
+                        rs.getBigDecimal("total"),
                         rs.getTimestamp("created_at").toLocalDateTime(),
                         rs.getTimestamp("updated_at").toLocalDateTime()
                 );
@@ -45,7 +46,7 @@ public class WalletRepository {
     }
 
     public Wallet findByCurrency(String currency) {
-        String sql = "SELECT * FROM wallet WHERE currency= ? ";
+        String sql = "SELECT * FROM \"live-wallet\" WHERE currency= ? ";
 
         try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
             stmt.setString(1, currency);
@@ -57,7 +58,7 @@ public class WalletRepository {
 
                 return new Wallet(
                         rs.getString("currency"),
-                        rs.getDouble("wallet"),
+                        rs.getBigDecimal("wallet"),
                         rs.getTimestamp("created_at").toLocalDateTime(),
                         rs.getTimestamp("updated_at").toLocalDateTime()
                 );
@@ -68,7 +69,7 @@ public class WalletRepository {
     }
 
     public void insert(Wallet wallet) throws SQLException {
-        String sql = "INSERT INTO wallet (currency, total, created_at, updated_at) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO \"live-wallet\" (currency, total, created_at, updated_at) VALUES (?, ?, ?, ?)";
 
         try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
             stmt.setString(1, wallet.getCurrency());
@@ -79,11 +80,11 @@ public class WalletRepository {
         }
     }
 
-    public void updateWallet(Wallet wallet, double amount) {
-        String sql = "UPDATE wallet SET total = ?, updated_at = ? WHERE currency = ?";
+    public void updateWallet(Wallet wallet, BigDecimal amount) {
+        String sql = "UPDATE \"live-wallet\" SET total = ?, updated_at = ? WHERE currency = ?";
 
         try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
-            stmt.setDouble(1, wallet.getTotal() + amount);
+            stmt.setBigDecimal(1, wallet.getTotal().add(amount));
             stmt.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
             stmt.setString(3, wallet.getCurrency());
             stmt.executeUpdate();

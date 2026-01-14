@@ -1,18 +1,20 @@
 package com.mihailTs.trading_bot.service;
 
 import com.mihailTs.trading_bot.exception.ElementNotFoundException;
-import com.mihailTs.trading_bot.exception.IllegalOperationException;
-import com.mihailTs.trading_bot.model.TrainingPrice;
-import com.mihailTs.trading_bot.model.TrainingTransaction;
+import com.mihailTs.trading_bot.exception.IllegalTransactionPriceException;
+import com.mihailTs.trading_bot.exception.IllegalTransactionTimeException;
+import com.mihailTs.trading_bot.exception.NotEnoughAssetException;
+import com.mihailTs.trading_bot.exception.NotEnoughMoneyException;
+import com.mihailTs.trading_bot.model.LiveAsset;
+import com.mihailTs.trading_bot.model.LivePrice;
+import com.mihailTs.trading_bot.model.LiveTransaction;
 import com.mihailTs.trading_bot.model.Token;
-import com.mihailTs.trading_bot.model.TrainingPrice;
-import com.mihailTs.trading_bot.model.TrainingTransaction;
-import com.mihailTs.trading_bot.repository.TrainingTransactionRepository;
+import com.mihailTs.trading_bot.model.Wallet;
+import com.mihailTs.trading_bot.repository.LiveTransactionRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,15 +22,21 @@ import java.util.UUID;
 public class LiveTransactionService {
 
     private final TokenService tokenService;
-    private final TrainingTransactionRepository trainingTransactionRepository;
-    public final TrainingPriceService trainingPriceService;
+    private final LiveTransactionRepository liveTransactionRepository;
+    private final LivePriceService livePriceService;
+    private final LiveAssetService liveAssetService;
+    private final LiveWalletService liveWalletService;
 
-    public LiveTransactionService(TrainingTransactionRepository trainingTransactionRepository,
+    public LiveTransactionService(LiveTransactionRepository liveTransactionRepository,
                                   TokenService tokenService,
-                                  TrainingPriceService trainingPriceService) {
+                                  LivePriceService livePriceService,
+                                  LiveAssetService liveAssetService,
+                                  LiveWalletService liveWalletService) {
         this.tokenService = tokenService;
-        this.trainingTransactionRepository = trainingTransactionRepository;
-        this.trainingPriceService = trainingPriceService;
+        this.liveTransactionRepository = liveTransactionRepository;
+        this.livePriceService = livePriceService;
+        this.liveWalletService = liveWalletService;
+        this.liveAssetService = liveAssetService;
     }
 
     public void saveNewTransaction(UUID id,
@@ -39,12 +47,29 @@ public class LiveTransactionService {
                                    LocalDateTime createdAt) {
         try {
             Token token = tokenService.getTokenById(tokenId);
-            TrainingPrice save_price = trainingPriceService.getById(priceId);
-            TrainingPrice latest_price = trainingPriceService.getLatestPrice(tokenId);
-            if(save_price.getId() != latest_price.getId()) {
-                throw new IllegalOperationException("A transaction cannot be registered with earlier price");
+            LivePrice savePrice = livePriceService.getById(priceId);
+            LivePrice latestPrice = livePriceService.getLatestPrice(tokenId);
+            LiveAsset asset = liveAssetService.getAssetByTokenId(tokenId);
+            if(savePrice.getId() != latestPrice.getId()) {
+                throw new IllegalTransactionPriceException("A transaction cannot be registered with earlier price");
             }
-            trainingTransactionRepository.insert(new TrainingTransaction(id, quantity, priceId, type, createdAt));
+            if(savePrice.getId() != latestPrice.getId()) {
+                throw new IllegalTransactionTimeException("A transaction cannot be registered with earlier timestamp");
+            }
+            if(type.equals("BUY")) {
+                Wallet wallet = liveWalletService.getWalletByCurrency("USD");
+                if(quantity.multiply(latestPrice.getPrice()).compareTo(wallet.getTotal()) > 0) {
+                    throw new NotEnoughMoneyException("Value of bought crypto exceeds wallet");
+                }
+                liveWalletService.addMoneyToWallet("USD", quantity.multiply(latestPrice.getPrice()).multiply(BigDecimal.valueOf(-1)));
+            } else {
+                Wallet wallet = liveWalletService.getWalletByCurrency("USD");
+                if(asset.getQuantity().compareTo(quantity) < 0) {
+                    throw new NotEnoughAssetException("Transacted quantity is bigger than available asset");
+                }
+                liveWalletService.addMoneyToWallet("USD", quantity.multiply(latestPrice.getPrice()));
+            }
+            liveTransactionRepository.insert(new LiveTransaction(id, quantity, priceId, type, createdAt));
         } catch (ElementNotFoundException e) {
             // TODO: better exception handling
             System.err.println("Token not found: " + e.getMessage());
@@ -54,9 +79,9 @@ public class LiveTransactionService {
         }
     }
 
-    public List<TrainingTransaction> getLastTransactions(int limit) {
+    public List<LiveTransaction> getLastTransactions(int limit) {
         try {
-            return trainingTransactionRepository.findLast(limit);
+            return liveTransactionRepository.findLast(limit);
         } catch (ElementNotFoundException e) {
             // TODO: better exception handling
             System.err.println("Token not found: " + e.getMessage());
@@ -66,9 +91,9 @@ public class LiveTransactionService {
         }
     }
 
-    public List<TrainingTransaction> getPagedTransactions(int page, int pageSize) {
+    public List<LiveTransaction> getPagedTransactions(int page, int pageSize) {
         try {
-            return trainingTransactionRepository.findPageByDate(page, pageSize);
+            return liveTransactionRepository.findPageByDate(page, pageSize);
         } catch (ElementNotFoundException e) {
             // TODO: better exception handling
             System.err.println("Token not found: " + e.getMessage());

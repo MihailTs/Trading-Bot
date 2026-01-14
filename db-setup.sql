@@ -89,3 +89,13 @@ CREATE TABLE wallet(
 
 INSERT INTO "wallet" ("currency", "total", "created_at", "updated_at")
 VALUES ('USD', 1000, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+
+ALTER TABLE "wallet" RENAME TO "training-wallet";
+
+CREATE TABLE "live-wallet"(
+   "currency" varchar(8) PRIMARY KEY,
+   "total" decimal NOT NULL,
+   "created_at" timestamp NOT NULL,
+   "updated_at" timestamp NOT NULL
+);

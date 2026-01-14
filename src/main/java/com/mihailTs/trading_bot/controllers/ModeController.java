@@ -4,6 +4,8 @@ import com.mihailTs.trading_bot.service.ModeManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -33,19 +35,19 @@ public class ModeController {
             @RequestParam String startDate,
             @RequestParam String endDate) {
         try {
-            LocalDateTime start = LocalDateTime.parse(startDate, formatter);
-            LocalDateTime end = LocalDateTime.parse(endDate, formatter);
+            LocalDate start = LocalDate.parse(startDate, formatter);
+            LocalDate end = LocalDate.parse(endDate, formatter);
 
             if (start.isAfter(end)) {
                 return ResponseEntity.badRequest()
                         .body("Start date must be before end date");
             }
 
-            // validate max 3 days range for training data
-            long days = end.toLocalDate().toEpochDay() - start.toLocalDate().toEpochDay();
-            if (days > 3) {
+            // max 360 days range for training data
+            long days = end.toEpochDay() - start.toEpochDay();
+            if (days > 360) {
                 return ResponseEntity.badRequest()
-                        .body("Training data range cannot exceed 3 days");
+                        .body("Training data range cannot exceed 365 days");
             }
 
             modeManager.setTrainingDates(start, end);
@@ -59,7 +61,7 @@ public class ModeController {
 
     @GetMapping("/current")
     public ResponseEntity<String> getCurrentMode() {
-        String response = "Current mode: " + modeManager.getMode();
+        String response = "Current mode: " + modeManager.getCurrentMode();
         if (modeManager.isTrainingMode()) {
             response += " | Start: " + modeManager.getTrainingStartDate() +
                     " | End: " + modeManager.getTrainingEndDate();
