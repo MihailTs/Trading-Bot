@@ -88,4 +88,9 @@ public class TrainingPriceService {
     public List<TrainingPrice> getPricesBetween(LocalDateTime start, LocalDateTime end) {
         return trainingPriceRepository.findByTimestampBetween(start, end);
     }
+
+    public void clearData() {
+        this.trainingPriceRepository.deleteAll();
+    }
+
 }

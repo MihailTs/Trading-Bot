@@ -1,5 +1,6 @@
 package com.mihailTs.trading_bot.repository;
 
+import com.mihailTs.trading_bot.config.DatabaseConfig;
 import com.mihailTs.trading_bot.exception.ElementNotFoundException;
 import com.mihailTs.trading_bot.model.TrainingTransaction;
 import com.mihailTs.trading_bot.model.TrainingTransaction;
@@ -17,17 +18,17 @@ import java.util.UUID;
 
 @Repository
 public class TrainingTransactionRepository {
-    private Connection connection;
+    private DatabaseConfig databaseConfig;
 
-    public TrainingTransactionRepository(Connection connection) {
-        setConnection(connection);
+    public TrainingTransactionRepository(DatabaseConfig databaseConfig) {
+        this.databaseConfig = databaseConfig;
     }
 
     public List<TrainingTransaction> findAll() {
         ArrayList<TrainingTransaction> transactions = new ArrayList<>();
         String sql = "SELECT * FROM \"training-transaction\"";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql);
+        try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
@@ -51,7 +52,7 @@ public class TrainingTransactionRepository {
         String sql = "SELECT * FROM \"training-transaction\" WHERE id = ?";
         TrainingTransaction transaction = null;
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
             stmt.setObject(1, id);
 
             try (ResultSet rs = stmt.executeQuery()) {
@@ -82,7 +83,7 @@ public class TrainingTransactionRepository {
         ArrayList<TrainingTransaction> transactions = new ArrayList<>();
         String sql = "SELECT * FROM \"training-transaction\" ORDER BY created_at DESC LIMIT ?";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
             stmt.setInt(1, limit);
 
             try (ResultSet rs = stmt.executeQuery()) {
@@ -109,7 +110,7 @@ public class TrainingTransactionRepository {
     public void insert(TrainingTransaction transaction) {
         String sql = "INSERT INTO \"training-transaction\" (id, quantity, price_id, type, created_at) VALUES (?, ?, ?, ?, ?)";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
             stmt.setObject(1, transaction.getId());
             stmt.setBigDecimal(2, transaction.getQuantity());
             stmt.setObject(3, transaction.getPriceId());
@@ -126,7 +127,7 @@ public class TrainingTransactionRepository {
         ArrayList<TrainingTransaction> transactions = new ArrayList<>();
         String sql = "SELECT * FROM \"training-transaction\" ORDER BY created_at DESC OFFSET ? * ? LIMIT ?";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
             stmt.setInt(1, page);
             stmt.setInt(2, pageSize);
             stmt.setInt(3, pageSize);
@@ -152,11 +153,12 @@ public class TrainingTransactionRepository {
         }
     }
 
-    public void setConnection(Connection connection) {
-        this.connection = connection;
-    }
-
-    public Connection getConnection() {
-        return connection;
+    public void deleteAll() {
+        String sql = "DELETE FROM \"training-transaction\"";
+        try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

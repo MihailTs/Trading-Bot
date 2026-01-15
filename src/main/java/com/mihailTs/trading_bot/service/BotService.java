@@ -1,7 +1,15 @@
 package com.mihailTs.trading_bot.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.mihailTs.trading_bot.entity.ActionEnum;
+import com.mihailTs.trading_bot.model.Asset;
+import com.mihailTs.trading_bot.model.LiveAsset;
+import com.mihailTs.trading_bot.model.LivePrice;
+import com.mihailTs.trading_bot.model.LiveTransaction;
+import com.mihailTs.trading_bot.model.TrainingAsset;
 import com.mihailTs.trading_bot.model.TrainingPrice;
+import com.mihailTs.trading_bot.model.TrainingTransaction;
+import com.mihailTs.trading_bot.model.Wallet;
 import com.mihailTs.trading_bot.websocket.AssetWebSocketHandler;
 import com.mihailTs.trading_bot.websocket.TokenPriceWebSocketHandler;
 import jakarta.annotation.PostConstruct;
@@ -16,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.Instant;
@@ -24,6 +33,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.mihailTs.trading_bot.service.ModeManager.Mode.LIVE;
 import static com.mihailTs.trading_bot.service.ModeManager.Mode.TRAINING;
@@ -44,11 +55,13 @@ public class BotService {
     private TrainingAssetService trainingAssetService;
     private TrainingTransactionService trainingTransactionService;
     private LiveTransactionService liveTransactionService;
-    private LiveWalletService walletService;
+    private LiveWalletService liveWalletService;
+    private TrainingWalletService trainingWalletService;
     private final TokenPriceWebSocketHandler tokenPriceWebSocketHandler;
     private final AssetWebSocketHandler assetWebSocketHandler;
     private final ObjectMapper objectMapper;
     private final ModeManager modeManager;
+    private final StrategyService strategyService;
 
     public BotService(TokenService tokenService,
                       LivePriceService livePriceService,
@@ -59,30 +72,24 @@ public class BotService {
                       TokenPriceWebSocketHandler tokenPriceWebSocketHandler,
                       AssetWebSocketHandler assetWebSocketHandler,
                       TrainingPriceService trainingPriceService,
+                      LiveWalletService liveWalletService,
+                      TrainingWalletService trainingWalletService,
                       ObjectMapper objectMapper,
-                      ModeManager modeManager) throws IOException {
+                      ModeManager modeManager,
+                      StrategyService strategyService) throws IOException {
         this.tokenService = tokenService;
         this.livePriceService = livePriceService;
         this.liveAssetService = liveAssetService;
-        this.walletService = walletService;
+        this.liveWalletService = liveWalletService;
         this.trainingPriceService = trainingPriceService;
+        this.trainingWalletService = trainingWalletService;
         this.tokenPriceWebSocketHandler = tokenPriceWebSocketHandler;
         this.assetWebSocketHandler = assetWebSocketHandler;
         this.liveTransactionService = liveTransactionService;
         this.trainingTransactionService = trainingTransactionService;
         this.objectMapper = objectMapper;
         this.modeManager = modeManager;
-
-        // Register listener to fetch data immediately when switching to training mode
-        modeManager.registerModeChangeListener(mode -> {
-            if (mode == ModeManager.Mode.TRAINING) {
-                try {
-                    fetchAndLoadFirstDay();
-                } catch (IOException e) {
-                    System.err.println("Error fetching initial training data: " + e.getMessage());
-                }
-            }
-        });
+        this.strategyService = strategyService;
     }
 
     // run once every 24 hours - for LIVE mode ONLY
@@ -126,6 +133,18 @@ public class BotService {
         parseJSONTokenPricesResponse(jsonResponse);
 
         broadcastLiveTokenUpdates(tokenIDs);
+
+        for (String tokenId : tokenIDs) {
+            List<Double> lastPrices = livePriceService.getLatestPrices(tokenId, 100)
+                                            .stream()
+                                            .map(price -> price.getPrice().doubleValue())
+                                            .toList();
+            if (strategyService.nextAction(lastPrices) == ActionEnum.BUY) {
+                buyToken(tokenId);
+            } else if (strategyService.nextAction(lastPrices) == ActionEnum.SELL) {
+                sellToken(tokenId);
+            }
+        }
     }
 
     // every minute fetch the next part of the training data
@@ -386,4 +405,89 @@ public class BotService {
 
         System.out.println("Loaded batch for " + date + " with " + dayPrices.size() + " prices");
     }
+
+    // always buying with half the available money
+    private void buyToken(String tokenId) {
+        if(modeManager.isLiveMode()) {
+            Wallet wallet = liveWalletService.getWalletByCurrency("USD");
+            LiveAsset asset = liveAssetService.getAssetByTokenId(tokenId);
+            if(asset == null) {
+                // TODO: add should return the added asset
+                liveAssetService.addAsset(tokenId);
+            }
+            asset = liveAssetService.getAssetByTokenId(tokenId);
+            LivePrice livePrice = livePriceService.getLatestPrice(tokenId);
+            liveTransactionService.saveNewTransaction(
+                    UUID.randomUUID(),
+                    tokenId,
+                    wallet.getTotal().divide(livePrice.getPrice()),
+                    livePrice.getId(),
+                    "BUY",
+                    LocalDateTime.now()
+            );
+            liveWalletService.addMoneyToWallet(
+                    wallet.getCurrency(),
+                    livePrice.getPrice()
+                            .multiply(wallet.getTotal().divide(livePrice.getPrice())).multiply(BigDecimal.valueOf(-1)));
+            liveAssetService.updateAssetQuantity(tokenId, asset.getQuantity().add(wallet.getTotal().divide(livePrice.getPrice())));
+        } else {
+            Wallet wallet = trainingWalletService.getWalletByCurrency("USD");
+            TrainingAsset asset = trainingAssetService.getAssetByTokenId(tokenId);
+            if(asset == null) {
+                // TODO: add should return the added asset
+                trainingAssetService.addAsset(tokenId);
+            }
+            asset = trainingAssetService.getAssetByTokenId(tokenId);
+            TrainingPrice trainingPrice = trainingPriceService.getLatestPrice(tokenId);
+            liveTransactionService.saveNewTransaction(
+                    UUID.randomUUID(),
+                    tokenId,
+                    wallet.getTotal().divide(trainingPrice.getPrice()),
+                    trainingPrice.getId(),
+                    "BUY",
+                    LocalDateTime.now()
+            );
+            liveWalletService.addMoneyToWallet(
+                    wallet.getCurrency(),
+                    trainingPrice.getPrice()
+                            .multiply(wallet.getTotal().divide(trainingPrice.getPrice())).multiply(BigDecimal.valueOf(-1)));
+            liveAssetService.updateAssetQuantity(tokenId, asset.getQuantity().add(wallet.getTotal().divide(livePrice.getPrice())));
+        }
+    }
+
+    // selling half the token asset if available
+    private void sellToken(String tokenId) {
+        if(modeManager.isLiveMode()) {
+            Wallet wallet = liveWalletService.getWalletByCurrency("USD");
+            LiveAsset asset = liveAssetService.getAssetByTokenId(tokenId);
+            LivePrice livePrice = livePriceService.getLatestPrice(tokenId);
+            liveTransactionService.saveNewTransaction(
+                    UUID.randomUUID(),
+                    tokenId,
+                    asset.getQuantity().divide(BigDecimal.valueOf(2)),
+                    livePrice.getId(),
+                    "SELL",
+                    LocalDateTime.now()
+            );
+            liveWalletService.addMoneyToWallet(
+                    wallet.getCurrency(),
+                    livePrice.getPrice()
+                            .multiply(wallet.getTotal().divide(livePrice.getPrice())).multiply(BigDecimal.valueOf(-1)));
+            liveAssetService.updateAssetQuantity(tokenId, asset.getQuantity().subtract(asset.getQuantity().divide(BigDecimal.valueOf(2))));
+        } else {
+            Wallet wallet = trainingWalletService.getWalletByCurrency("USD");
+            TrainingPrice livePrice = trainingPriceService.getLatestPrice(tokenId);
+            trainingTransactionService.saveNewTransaction(
+                    UUID.randomUUID(),
+                    tokenId,
+                    wallet.getTotal().divide(livePrice.getPrice(), RoundingMode.DOWN),
+                    livePrice.getId(),
+                    "BUY",
+                    LocalDateTime.now()
+            );
+            trainingWalletService.addMoneyToWallet(wallet.getCurrency(), livePrice.getPrice().
+                    multiply(wallet.getTotal().divide(livePrice.getPrice())));
+        }
+    }
+
 }

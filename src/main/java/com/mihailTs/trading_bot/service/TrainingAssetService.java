@@ -2,6 +2,7 @@ package com.mihailTs.trading_bot.service;
 
 import com.mihailTs.trading_bot.dto.AssetValueDto;
 import com.mihailTs.trading_bot.exception.ElementNotFoundException;
+import com.mihailTs.trading_bot.model.LiveAsset;
 import com.mihailTs.trading_bot.model.TrainingAsset;
 import com.mihailTs.trading_bot.model.TrainingPrice;
 import com.mihailTs.trading_bot.model.Token;
@@ -9,7 +10,9 @@ import com.mihailTs.trading_bot.repository.TrainingAssetRepository;
 import com.mihailTs.trading_bot.repository.TrainingPriceRepository;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -90,6 +93,26 @@ public class TrainingAssetService {
 
         } catch (ElementNotFoundException e) {
             return null;
+        }
+    }
+
+    public void clearData() {
+        this.trainingAssetRepository.deleteAll();
+    }
+
+    public void updateAssetQuantity(String tokenId, BigDecimal quantity) {
+        try {
+            trainingAssetRepository.updateQuantity(tokenId, quantity);
+        } catch (ElementNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addAsset(String tokenId) {
+        try {
+            trainingAssetRepository.insert(new TrainingAsset(tokenId, BigDecimal.valueOf(0), LocalDateTime.now(), LocalDateTime.now()));
+        } catch (ElementNotFoundException e) {
+            e.printStackTrace();
         }
     }
 

@@ -54,8 +54,6 @@ public class LivePriceService {
             // TODO: better exception handling
             System.err.println("Token not found: " + e.getMessage());
             throw e;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to save new price", e);
         }
     }
 
@@ -66,8 +64,17 @@ public class LivePriceService {
             // TODO: better exception handling
             System.err.println("Token not found: " + e.getMessage());
             throw e;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to save new price", e);
+        }
+    }
+
+    public List<LivePrice> getLatestPrices(String tokenId, int limit) {
+        try {
+            Token token = tokenRepository.findById(tokenId);
+            return livePriceRepository.getLatest(tokenId, limit);
+        } catch (ElementNotFoundException e) {
+            // TODO: better exception handling
+            System.err.println("Token not found: " + e.getMessage());
+            throw e;
         }
     }
 

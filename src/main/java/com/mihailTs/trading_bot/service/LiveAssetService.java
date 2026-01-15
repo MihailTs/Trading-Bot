@@ -9,7 +9,9 @@ import com.mihailTs.trading_bot.repository.LiveAssetRepository;
 import com.mihailTs.trading_bot.repository.LivePriceRepository;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -90,6 +92,22 @@ public class LiveAssetService {
 
         } catch (ElementNotFoundException e) {
             return null;
+        }
+    }
+
+    public void updateAssetQuantity(String tokenId, BigDecimal quantity) {
+        try {
+            liveAssetRepository.updateQuantity(tokenId, quantity);
+        } catch (ElementNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addAsset(String tokenId) {
+        try {
+            liveAssetRepository.insert(new LiveAsset(tokenId, BigDecimal.valueOf(0), LocalDateTime.now(), LocalDateTime.now()));
+        } catch (ElementNotFoundException e) {
+            e.printStackTrace();
         }
     }
 

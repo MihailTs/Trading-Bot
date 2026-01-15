@@ -48,11 +48,21 @@ public class TrainingWalletService {
     public void addMoneyToWallet(String currency, BigDecimal amount) {
         try {
             Wallet wallet = walletRepository.findByCurrency(currency);
-            walletRepository.updateWallet(wallet, amount);
+            if(wallet == null) {
+                walletRepository.insert(new Wallet(currency, amount, LocalDateTime.now(), LocalDateTime.now()));
+            } else {
+                walletRepository.updateWallet(wallet, amount);
+            }
         } catch (ElementNotFoundException e) {
             // TODO: fix exception handling here
             throw e;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
+    }
+
+    public void clearData() {
+        this.walletRepository.deleteAll();
     }
 
 }

@@ -6,12 +6,14 @@ import com.mihailTs.trading_bot.model.LiveAsset;
 import com.mihailTs.trading_bot.model.Token;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -124,6 +126,25 @@ public class LiveAssetRepository {
         }
 
         return rowsDeleted;
+    }
+
+    public void updateQuantity(String tokenId, BigDecimal quantity) {
+        String sql = "UPDATE \"live-asset\" SET quantity = ?, updated_at = ? WHERE id = ?";
+
+        try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
+            stmt.setBigDecimal(1, quantity);
+            stmt.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
+            stmt.setString(3, tokenId);
+
+            int rowsUpdated = stmt.executeUpdate();
+            if (rowsUpdated == 0) {
+                throw new ElementNotFoundException(
+                        String.format("No asset with token_id %s was found to update.", tokenId)
+                );
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
 }

@@ -93,4 +93,13 @@ public class TrainingWalletRepository {
         }
     }
 
+    public void deleteAll() {
+        String sql = "DELETE FROM \"training-wallet\"";
+        try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

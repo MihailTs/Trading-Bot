@@ -146,4 +146,29 @@ public class LivePriceRepository {
         return prices;
     }
 
+    public List<LivePrice> getLatest(String tokenId, int limit) {
+        String sql = "SELECT * FROM \"live-price\" WHERE token_id = ? ORDER BY created_at DESC LIMIT ?";
+        List<LivePrice> prices = new ArrayList<>();
+
+        try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
+            stmt.setString(1, tokenId);
+            stmt.setInt(2, limit);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    prices.add(new LivePrice(
+                            (UUID) rs.getObject("id"),
+                            rs.getString("token_id"),
+                            rs.getBigDecimal("price"),
+                            rs.getTimestamp("created_at").toLocalDateTime()
+                    ));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return prices;
+    }
+
 }

@@ -103,4 +103,9 @@ public class TrainingTransactionService {
             throw new RuntimeException("Failed to save new price", e);
         }
     }
+
+    public void clearData() {
+        this.trainingTransactionRepository.deleteAll();
+    }
+
 }

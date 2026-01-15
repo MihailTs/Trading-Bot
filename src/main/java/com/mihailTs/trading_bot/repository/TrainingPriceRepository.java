@@ -210,4 +210,13 @@ public class TrainingPriceRepository {
         return prices;
     }
 
+    public void deleteAll() {
+        String sql = "DELETE FROM \"training-price\"";
+        try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

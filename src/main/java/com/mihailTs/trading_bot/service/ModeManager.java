@@ -4,6 +4,7 @@ import com.mihailTs.trading_bot.model.TrainingPrice;
 import lombok.Getter;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,12 +33,31 @@ public class ModeManager {
     private List<TrainingPrice> trainingBatch;
     @Getter
     private int totalDaysProcessed;
+    private final TrainingAssetService trainingAssetService;
+    private final TrainingPriceService trainingPriceService;
+    private final TrainingWalletService trainingWalletService;
+    private final TrainingTransactionService trainingTransactionService;
+
+    public ModeManager(TrainingTransactionService trainingTransactionService,
+                       TrainingWalletService trainingWalletService,
+                       TrainingAssetService trainingAssetService,
+                       TrainingPriceService trainingPriceService) {
+        this.trainingAssetService = trainingAssetService;
+        this.trainingPriceService = trainingPriceService;
+        this.trainingWalletService = trainingWalletService;
+        this.trainingTransactionService = trainingTransactionService;
+    }
 
     private final List<Consumer<Mode>> modeChangeListeners = new ArrayList<>();
 
     public void setMode(Mode mode) {
         this.currentMode = mode;
         System.out.println("Mode switched to: " + mode);
+
+        if(mode == Mode.TRAINING) {
+            clearTrainingData();
+            trainingWalletService.addMoneyToWallet("USD", BigDecimal.valueOf(1000));
+        }
 
         modeChangeListeners.forEach(listener -> listener.accept(mode));
     }
@@ -85,7 +105,7 @@ public class ModeManager {
     }
 
     public boolean isBatchExhausted() {
-        boolean exhausted = trainingBatch == null || currentBatchPointer >= trainingBatch.size();
+        boolean exhausted = (trainingBatch == null || currentBatchPointer >= trainingBatch.size());
         if (exhausted && trainingBatch != null) {
             System.out.println("Batch exhausted check - pointer: " + currentBatchPointer + ", batch size: " + trainingBatch.size());
         }
@@ -109,18 +129,11 @@ public class ModeManager {
         System.out.println("Day fetched: " + lastFetchedDay);
     }
 
-    public void registerModeChangeListener(Consumer<Mode> listener) {
-        modeChangeListeners.add(listener);
+    public void clearTrainingData() {
+        trainingTransactionService.clearData();
+        trainingWalletService.clearData();
+        trainingPriceService.clearData();
+        trainingAssetService.clearData();
     }
 
-    public int getBatchSize() {
-        return trainingBatch != null ? trainingBatch.size() : 0;
-    }
-
-    public int getRemainingInBatch() {
-        if (trainingBatch == null) {
-            return 0;
-        }
-        return Math.max(0, trainingBatch.size() - currentBatchPointer);
-    }
 }
