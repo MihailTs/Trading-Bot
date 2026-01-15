@@ -17,15 +17,16 @@ public class WebSocketConfig implements WebSocketConfigurer {
     private final TokenPriceWebSocketHandler tokenPriceWebSocketHandler;
     private final AssetWebSocketHandler assetWebSocketHandler;
     private final WalletWebSocketHandler walletWebSocketHandler;
-//    private final TransactionWebSocketHandler transactionWebSocketHandler;
+    private final TransactionWebSocketHandler transactionWebSocketHandler;
 
     public WebSocketConfig(TokenPriceWebSocketHandler tokenPriceWebSocketHandler,
                            AssetWebSocketHandler assetWebSocketHandler,
-                           WalletWebSocketHandler walletWebSocketHandler) {
+                           WalletWebSocketHandler walletWebSocketHandler,
+                           TransactionWebSocketHandler transactionWebSocketHandler) {
         this.tokenPriceWebSocketHandler = tokenPriceWebSocketHandler;
         this.assetWebSocketHandler = assetWebSocketHandler;
         this.walletWebSocketHandler = walletWebSocketHandler;
-//        this.transactionWebSocketHandler = transactionWebSocketHandler;
+        this.transactionWebSocketHandler = transactionWebSocketHandler;
     }
 
     @Override
@@ -33,7 +34,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
         registry.addHandler(tokenPriceWebSocketHandler, "/ws/prices")
                 .addHandler(assetWebSocketHandler, "/ws/assets")
                 .addHandler(walletWebSocketHandler, "/ws/wallets")
-//                .addHandler(transactionWebSocketHandler, "/ws/transactions")
+                .addHandler(transactionWebSocketHandler, "/ws/transactions")
                 .setAllowedOrigins("*");
     }
 

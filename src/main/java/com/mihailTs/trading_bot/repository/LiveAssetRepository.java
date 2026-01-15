@@ -129,7 +129,7 @@ public class LiveAssetRepository {
     }
 
     public void updateQuantity(String tokenId, BigDecimal quantity) {
-        String sql = "UPDATE \"live-asset\" SET quantity = ?, updated_at = ? WHERE id = ?";
+        String sql = "UPDATE \"live-asset\" SET quantity = ?, updated_at = ? WHERE token_id = ?";
 
         try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
             stmt.setBigDecimal(1, quantity);

@@ -77,5 +77,7 @@ function addTransaction(id, tokenName, tokenTicker, type, quantity, timestamp) {
 }
 
 function removeOldestTransaction() {
-    latestTransactions.pop();
+    if (latestTransactions.length > 50) {
+        latestTransactions.pop();
+    }
 }

@@ -46,7 +46,7 @@ public class LiveWalletRepository {
     }
 
     public Wallet findByCurrency(String currency) {
-        String sql = "SELECT * FROM \"live-wallet\" WHERE currency= ? ";
+        String sql = "SELECT * FROM \"live-wallet\" WHERE currency = ?";
 
         try (PreparedStatement stmt = databaseConfig.connection().prepareStatement(sql)) {
             stmt.setString(1, currency);
@@ -58,13 +58,14 @@ public class LiveWalletRepository {
 
                 return new Wallet(
                         rs.getString("currency"),
-                        rs.getBigDecimal("wallet"),
+                        rs.getBigDecimal("total"),
                         rs.getTimestamp("created_at").toLocalDateTime(),
                         rs.getTimestamp("updated_at").toLocalDateTime()
                 );
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Database error while fetching token", e);
+            e.printStackTrace();
+            throw new RuntimeException("Database error while fetching wallet", e);
         }
     }
 

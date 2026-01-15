@@ -9,6 +9,7 @@ import com.mihailTs.trading_bot.model.LiveAsset;
 import com.mihailTs.trading_bot.model.LivePrice;
 import com.mihailTs.trading_bot.model.LiveTransaction;
 import com.mihailTs.trading_bot.model.Token;
+import com.mihailTs.trading_bot.model.TrainingTransaction;
 import com.mihailTs.trading_bot.model.Wallet;
 import com.mihailTs.trading_bot.repository.LiveTransactionRepository;
 import org.springframework.stereotype.Service;
@@ -50,15 +51,15 @@ public class LiveTransactionService {
             LivePrice savePrice = livePriceService.getById(priceId);
             LivePrice latestPrice = livePriceService.getLatestPrice(tokenId);
             LiveAsset asset = liveAssetService.getAssetByTokenId(tokenId);
-            if(savePrice.getId() != latestPrice.getId()) {
-                throw new IllegalTransactionPriceException("A transaction cannot be registered with earlier price");
-            }
-            if(savePrice.getId() != latestPrice.getId()) {
-                throw new IllegalTransactionTimeException("A transaction cannot be registered with earlier timestamp");
-            }
+//            if(savePrice.getId() != latestPrice.getId()) {
+//                throw new IllegalTransactionPriceException("A transaction cannot be registered with earlier price");
+//            }
             if(type.equals("BUY")) {
                 Wallet wallet = liveWalletService.getWalletByCurrency("USD");
-                if(quantity.multiply(latestPrice.getPrice()).compareTo(wallet.getTotal()) > 0) {
+                System.out.println();
+                System.out.println(quantity.multiply(savePrice.getPrice()) + "   " + wallet.getTotal());
+                System.out.println();
+                if(quantity.multiply(savePrice.getPrice()).compareTo(wallet.getTotal()) > 0) {
                     throw new NotEnoughMoneyException("Value of bought crypto exceeds wallet");
                 }
                 liveWalletService.addMoneyToWallet("USD", quantity.multiply(latestPrice.getPrice()).multiply(BigDecimal.valueOf(-1)));
@@ -70,36 +71,37 @@ public class LiveTransactionService {
                 liveWalletService.addMoneyToWallet("USD", quantity.multiply(latestPrice.getPrice()));
             }
             liveTransactionRepository.insert(new LiveTransaction(id, quantity, priceId, type, createdAt));
-        } catch (ElementNotFoundException e) {
-            // TODO: better exception handling
-            System.err.println("Token not found: " + e.getMessage());
-            throw e;
         } catch (Exception e) {
-            throw new RuntimeException("Failed to save new price", e);
+            e.printStackTrace();
+            throw new RuntimeException("Failed to save new transaction", e);
         }
     }
 
     public List<LiveTransaction> getLastTransactions(int limit) {
         try {
             return liveTransactionRepository.findLast(limit);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to fetch transactions", e);
+        }
+    }
+
+    public LiveTransaction getById(UUID id) {
+        try {
+            return liveTransactionRepository.findById(id);
         } catch (ElementNotFoundException e) {
             // TODO: better exception handling
-            System.err.println("Token not found: " + e.getMessage());
+            System.err.println("Transaction not found: " + e.getMessage());
             throw e;
         } catch (Exception e) {
-            throw new RuntimeException("Failed to save new price", e);
+            throw new RuntimeException("Failed to save new transaction", e);
         }
     }
 
     public List<LiveTransaction> getPagedTransactions(int page, int pageSize) {
         try {
             return liveTransactionRepository.findPageByDate(page, pageSize);
-        } catch (ElementNotFoundException e) {
-            // TODO: better exception handling
-            System.err.println("Token not found: " + e.getMessage());
-            throw e;
         } catch (Exception e) {
-            throw new RuntimeException("Failed to save new price", e);
+            throw new RuntimeException("Failed to save new transaction", e);
         }
     }
 }

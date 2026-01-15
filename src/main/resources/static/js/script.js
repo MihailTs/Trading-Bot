@@ -77,13 +77,19 @@ function connectWebSocket() {
     websocketTransaction.onmessage = (event) => {
         try {
             const update = JSON.parse(event.data);
+
+            let timestamp = update.timestamp;
+            if (timestamp && !timestamp.includes('Z')) {
+                timestamp = new Date(timestamp + 'Z').toISOString();
+            }
+
             addTransaction(
                 update.id,
                 update.tokenName,
                 update.tokenTicker,
                 update.type,
                 update.quantity,
-                update.timestamp);
+                timestamp);
             removeOldestTransaction();
         } catch (error) {
             console.error('Error parsing WebSocket message:', error);

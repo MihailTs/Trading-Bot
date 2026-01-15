@@ -15,15 +15,15 @@ public class StrategyService {
     // else -> HOLD
     public ActionEnum nextAction(List<Double> timeSeries) {
         double[] series = timeSeries.stream().mapToDouble(Double::doubleValue).toArray();
-        ARMA model = ARMA.fit(series, 1, 1);
+        ARMA model = ARMA.fit(series, 1, 3);
 
         double[] forecast = model.forecast(20);
 
         for (double v : forecast) {
-            if (percentIncrease(series[series.length - 1], v) > 0.05) {
+            if (percentIncrease(series[series.length - 1], v) > 0.0002) {
                 return ActionEnum.BUY;
             }
-            if (percentIncrease(series[series.length - 1], v) < -0.05) {
+            if (percentIncrease(series[series.length - 1], v) < -0.0002) {
                 return ActionEnum.SELL;
             }
         }

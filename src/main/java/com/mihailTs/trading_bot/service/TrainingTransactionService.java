@@ -85,7 +85,18 @@ public class TrainingTransactionService {
             return trainingTransactionRepository.findLast(limit);
         } catch (ElementNotFoundException e) {
             // TODO: better exception handling
-            System.err.println("Token not found: " + e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to save new price", e);
+        }
+    }
+
+    public TrainingTransaction getById(UUID id) {
+        try {
+            return trainingTransactionRepository.findById(id);
+        } catch (ElementNotFoundException e) {
+            // TODO: better exception handling
+            System.err.println("Transaction not found: " + e.getMessage());
             throw e;
         } catch (Exception e) {
             throw new RuntimeException("Failed to save new price", e);
@@ -97,7 +108,6 @@ public class TrainingTransactionService {
             return trainingTransactionRepository.findPageByDate(page, pageSize);
         } catch (ElementNotFoundException e) {
             // TODO: better exception handling
-            System.err.println("Token not found: " + e.getMessage());
             throw e;
         } catch (Exception e) {
             throw new RuntimeException("Failed to save new price", e);

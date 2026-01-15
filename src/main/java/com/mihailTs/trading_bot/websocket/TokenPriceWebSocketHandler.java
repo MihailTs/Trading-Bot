@@ -25,10 +25,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Component
 public class TokenPriceWebSocketHandler extends TextWebSocketHandler {
 
-    private TokenService tokenService;
-    private LivePriceService priceService;
-    private LiveWalletService walletService;
-    private LiveAssetService liveAssetService;
+    private final TokenService tokenService;
+    private final LivePriceService priceService;
+    private final LiveWalletService walletService;
     private final ObjectMapper objectMapper;
     // thread-safe
     private final List<WebSocketSession> sessions = new CopyOnWriteArrayList<>();
@@ -36,12 +35,10 @@ public class TokenPriceWebSocketHandler extends TextWebSocketHandler {
     public TokenPriceWebSocketHandler(TokenService tokenService,
                                       LivePriceService livePriceService,
                                       LiveWalletService walletService,
-                                      LiveAssetService liveAssetService,
                                       ObjectMapper objectMapper) {
         this.tokenService = tokenService;
         this.priceService = livePriceService;
         this.walletService = walletService;
-        this.liveAssetService = liveAssetService;
         this.objectMapper = objectMapper;
     }
 
